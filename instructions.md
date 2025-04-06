@@ -92,17 +92,271 @@ The MVP will consist of:
     ```
     
 
-### Phase 2: File Upload & Processing
+### ### Phase 3: Frontend Development - File Upload & Data Extraction
 
-### Frontend - File Upload Component
-
-1. Create a file upload component for inventory and historical data
+1. **Create file upload components**
     
     ```jsx
-    // src/components/FileUpload.jsimport React, { useState } from 'react';import { Button, Typography, Paper, CircularProgress } from '@mui/material';import * as XLSX from 'xlsx';import axios from 'axios';const FileUpload = () => {  const [inventoryFile, setInventoryFile] = useState(null);  const [historicalFile, setHistoricalFile] = useState(null);  const [inventoryData, setInventoryData] = useState(null);  const [isLoading, setIsLoading] = useState(false);    const processInventoryFile = (file) => {    const reader = new FileReader();    reader.onload = (e) => {      const data = e.target.result;      const workbook = XLSX.read(data, { type: 'array' });      const sheetName = workbook.SheetNames[0];      const worksheet = workbook.Sheets[sheetName];      const json = XLSX.utils.sheet_to_json(worksheet);      setInventoryData(json);    };    reader.readAsArrayBuffer(file);  };    const handleInventoryFileChange = (event) => {    const file = event.target.files[0];    setInventoryFile(file);    processInventoryFile(file);  };    const handleHistoricalFileChange = (event) => {    setHistoricalFile(event.target.files[0]);  };    const handleSubmit = async () => {    if (!inventoryFile || !historicalFile) {      alert('Please upload both files');      return;    }        setIsLoading(true);        const formData = new FormData();    formData.append('inventory', inventoryFile);    formData.append('historical', historicalFile);        try {      const response = await axios.post('http://localhost:8000/api/process-files', formData, {        headers: {          'Content-Type': 'multipart/form-data'        }      });            // Handle the response      console.log(response.data);          } catch (error) {      console.error('Error uploading files:', error);    } finally {      setIsLoading(false);    }  };    return (    <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>      <Typography variant="h5" gutterBottom>Upload Files</Typography>            <div style={{ marginBottom: '20px' }}>        <Typography variant="subtitle1">Inventory Report</Typography>        <input          type="file"          accept=".xlsx,.xls,.csv"          onChange={handleInventoryFileChange}          style={{ display: 'none' }}          id="inventory-file-upload"        />        <label htmlFor="inventory-file-upload">          <Button variant="contained" component="span">            Upload Inventory File          </Button>        </label>        {inventoryFile && (          <Typography variant="body2" style={{ marginTop: '5px' }}>            Selected: {inventoryFile.name}          </Typography>        )}      </div>            <div style={{ marginBottom: '20px' }}>        <Typography variant="subtitle1">Historical Data (7 Days)</Typography>        <input          type="file"          accept=".xlsx,.xls,.csv"          onChange={handleHistoricalFileChange}          style={{ display: 'none' }}          id="historical-file-upload"        />        <label htmlFor="historical-file-upload">          <Button variant="contained" component="span">            Upload Historical Data          </Button>        </label>        {historicalFile && (          <Typography variant="body2" style={{ marginTop: '5px' }}>            Selected: {historicalFile.name}          </Typography>        )}      </div>            <Button         variant="contained"         color="primary"         onClick={handleSubmit}        disabled={!inventoryFile || !historicalFile || isLoading}      >        {isLoading ? <CircularProgress size={24} /> : 'Process Files'}      </Button>    </Paper>  );};export default FileUpload;
+    // components/FileUpload.tsx
+    import React, { useCallback } from 'react';
+    import { useDropzone } from 'react-dropzone';
+    
+    const FileUpload = ({ onFileLoaded, fileType }) => {
+      const onDrop = useCallback((acceptedFiles) => {
+        // Process the uploaded file
+        const file = acceptedFiles[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const data = new Uint8Array(e.target.result);
+            onFileLoaded(data, file.name, fileType);
+          };
+          reader.readAsArrayBuffer(file);
+        }
+      }, [onFileLoaded, fileType]);
+    
+      const { getRootProps, getInputProps, isDragActive } = useDropzone({
+        onDrop,
+        accept: {
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
+          'application/vnd.ms-excel': ['.xls']
+        }
+      });
+    
+      return (
+        <div className="upload-container">
+          <div
+            {...getRootProps()}
+            className={`dropzone ${isDragActive ? 'active' : ''}`}
+          >
+            <input {...getInputProps()} />
+            {isDragActive ?
+              <p>Drop the {fileType} file here...</p> :
+              <p>Drag & drop the {fileType} file here, or click to select</p>
+            }
+          </div>
+        </div>
+      );
+    };
+    
+    export default FileUpload;
     
     ```
     
+2. **Create Excel parsing utility**
+    
+    ```jsx
+    // utils/excelParser.js
+    import * as XLSX from 'xlsx';
+    
+    export const parseInventoryReport = (data) => {
+      const workbook = XLSX.read(data, { type: 'array' });
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+    
+      // Extract relevant fields from inventory report
+      // Adjust column names based on your actual Excel structure
+      return jsonData.map(row => ({
+        planId: row['Plan ID'] || '',
+        budgetCap: parseFloat(row['Budget Cap'] || 0),
+        tags: (row['Tags'] || '').split(',').map(tag => tag.trim()),
+        publisher: row['Publisher'] || '',
+        subcategory: row['Subcategory'] || ''
+      }));
+    };
+    
+    export const parseHistoricalData = (data) => {
+      const workbook = XLSX.read(data, { type: 'array' });
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+    
+      // Extract relevant fields from historical data
+      // Adjust column names based on your actual Excel structure
+      return jsonData.map(row => ({
+        planId: row['Plan ID'] || '',
+        publisher: row['Publisher'] || '',
+        date: new Date(row['Date']),
+        epc: parseFloat(row['EPC'] || 0),
+        ctr: parseFloat(row['CTR'] || 0),
+        revenue: parseFloat(row['Revenue'] || 0),
+        impressions: parseInt(row['Impressions'] || 0),
+        clicks: parseInt(row['Clicks'] || 0)
+      }));
+    };
+    
+    ```
+    
+3. **Create main upload page**
+    
+    ```jsx
+    // pages/index.tsx
+    import { useState } from 'react';
+    import FileUpload from '../components/FileUpload';
+    import { parseInventoryReport, parseHistoricalData } from '../utils/excelParser';
+    import { savePlansToFirebase } from '../utils/firebaseUtils';
+    import PlanTable from '../components/PlanTable';
+    
+    export default function Home() {
+      const [inventoryData, setInventoryData] = useState([]);
+      const [historicalData, setHistoricalData] = useState([]);
+      const [isLoading, setIsLoading] = useState(false);
+      const [message, setMessage] = useState('');
+    
+      const handleInventoryFile = (data, fileName) => {
+        try {
+          const parsedData = parseInventoryReport(data);
+          setInventoryData(parsedData);
+          setMessage(`Successfully parsed ${parsedData.length} plan entries from inventory report`);
+        } catch (error) {
+          console.error('Error parsing inventory file:', error);
+          setMessage('Error parsing inventory file. Please check the format.');
+        }
+      };
+    
+      const handleHistoricalFile = (data, fileName) => {
+        try {
+          const parsedData = parseHistoricalData(data);
+          setHistoricalData(parsedData);
+          setMessage(`Successfully parsed ${parsedData.length} historical data entries`);
+        } catch (error) {
+          console.error('Error parsing historical data file:', error);
+          setMessage('Error parsing historical data file. Please check the format.');
+        }
+      };
+    
+      const handleSubmit = async () => {
+        if (inventoryData.length === 0) {
+          setMessage('Please upload inventory data first');
+          return;
+        }
+    
+        setIsLoading(true);
+        try {
+          // Save plans to Firebase
+          await savePlansToFirebase(inventoryData);
+    
+          // Send historical data to rule engine API
+          if (historicalData.length > 0) {
+            const response = await fetch('/api/process-ranking', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                plans: inventoryData,
+                historicalData: historicalData
+              })
+            });
+    
+            if (response.ok) {
+              const result = await response.json();
+              // Handle download of the ranked output
+              // Implement downloadRankedOutput function
+            } else {
+              throw new Error('Failed to process data');
+            }
+          }
+    
+          setMessage('Data successfully processed and saved to Firebase');
+        } catch (error) {
+          console.error('Error processing data:', error);
+          setMessage('Error processing data. Please try again.');
+        } finally {
+          setIsLoading(false);
+        }
+      };
+    
+      return (
+        <div className="container mx-auto px-4 py-8">
+          <h1 className="text-2xl font-bold mb-6">Automatic Distribution Planner</h1>
+    
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div className="p-4 border rounded">
+              <h2 className="text-xl mb-4">Step 1: Upload Inventory Report</h2>
+              <FileUpload onFileLoaded={handleInventoryFile} fileType="inventory" />
+            </div>
+    
+            <div className="p-4 border rounded">
+              <h2 className="text-xl mb-4">Step 2: Upload 7-Day Historical Data</h2>
+              <FileUpload onFileLoaded={handleHistoricalFile} fileType="historical" />
+            </div>
+          </div>
+    
+          {inventoryData.length > 0 && (
+            <div className="mb-8">
+              <h2 className="text-xl mb-4">Extracted Plan Data</h2>
+              <PlanTable plans={inventoryData} />
+            </div>
+          )}
+    
+          <div className="flex justify-center mb-4">
+            <button
+              onClick={handleSubmit}
+              disabled={isLoading || inventoryData.length === 0}
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
+            >
+              {isLoading ? 'Processing...' : 'Submit Data'}
+            </button>
+          </div>
+    
+          {message && (
+            <div className="p-4 bg-gray-100 rounded text-center">
+              {message}
+            </div>
+          )}
+        </div>
+      );
+    }
+    
+    ```
+    
+4. **Create plan table component**
+    
+    ```jsx
+    // components/PlanTable.tsx
+    import React from 'react';
+    import { Plan } from '../types';
+    
+    interface PlanTableProps {
+      plans: Plan[];
+    }
+    
+    const PlanTable: React.FC<PlanTableProps> = ({ plans }) => {
+      return (
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="py-2 px-4 border-b text-left">Plan ID</th>
+                <th className="py-2 px-4 border-b text-left">Publisher</th>
+                <th className="py-2 px-4 border-b text-left">Budget Cap</th>
+                <th className="py-2 px-4 border-b text-left">Subcategory</th>
+                <th className="py-2 px-4 border-b text-left">Tags</th>
+              </tr>
+            </thead>
+            <tbody>
+              {plans.map((plan, index) => (
+                <tr key={index}>
+                  <td className="py-2 px-4 border-b">{plan.planId}</td>
+                  <td className="py-2 px-4 border-b">{plan.publisher}</td>
+                  <td className="py-2 px-4 border-b">${plan.budgetCap.toFixed(2)}</td>
+                  <td className="py-2 px-4 border-b">{plan.subcategory}</td>
+                  <td className="py-2 px-4 border-b">
+                    {plan.tags.map((tag, i) => (
+                      <span key={i} className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
+                        {tag}
+                      </span>
+                    ))}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    };
+    
+    export default PlanTable;
+    
+    ```
 
 ### Backend - File Processing API
 
