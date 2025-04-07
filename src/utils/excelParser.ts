@@ -1,4 +1,5 @@
 import * as XLSX from 'xlsx';
+import { getLatestPlanData } from './firebaseOperations';
 
 export const PREDEFINED_PUBLISHERS = ["Jiocinema", "Jioengage", "MyJio"] as const;
 export const PREDEFINED_TAGS = ["Paid", "Mandatory", "FOC"] as const;
@@ -13,6 +14,8 @@ export interface Plan {
   publisher: Publisher[];
   subcategory: string;
   isEdited?: boolean; // Flag to track if user has edited this plan
+  distributionCount?: number; // New field for Mandatory tag
+  clicksToBeDelivered?: number; // New field for FOC tag
 }
 
 export interface HistoricalData {
@@ -26,7 +29,7 @@ export interface HistoricalData {
   clicks: number;
 }
 
-export const parseInventoryReport = (data: ArrayBuffer): Plan[] => {
+export const parseInventoryReport = async (data: ArrayBuffer): Promise<Plan[]> => {
   const workbook = XLSX.read(data, { type: 'array' });
   const worksheet = workbook.Sheets[workbook.SheetNames[0]];
   const jsonData = XLSX.utils.sheet_to_json(worksheet);
@@ -34,15 +37,35 @@ export const parseInventoryReport = (data: ArrayBuffer): Plan[] => {
   // Add debug logging
   console.log('Raw Excel Data:', jsonData);
 
-  // Extract planId and subcategory, checking for different possible column names
-  return jsonData.map((row: any) => ({
-    planId: row['planId'] || row['Plan ID'] || row['plan_id'] || row['PlanId'] || '',
-    subcategory: row['subcategory'] || row['Subcategory'] || row['SubCategory'] || '',
-    budgetCap: 0,
-    tags: [],
-    publisher: [],
-    isEdited: false
+  // Process each row and check Firebase for existing data
+  const processedData = await Promise.all(jsonData.map(async (row: any) => {
+    const planId = row['planId'] || row['Plan ID'] || row['plan_id'] || row['PlanId'] || '';
+    
+    // Try to get existing data from Firebase
+    const existingPlan = await getLatestPlanData(planId);
+    
+    if (existingPlan) {
+      // Use existing data from Firebase
+      return {
+        ...existingPlan,
+        isEdited: false
+      };
+    }
+
+    // If no existing data, create new plan
+    return {
+      planId,
+      subcategory: row['subcategory'] || row['Subcategory'] || row['SubCategory'] || row['sub_category'] || '',
+      budgetCap: parseFloat(row['budgetCap'] || row['Budget Cap'] || row['budget_cap'] || 0),
+      tags: [],
+      publisher: [],
+      distributionCount: 0,
+      clicksToBeDelivered: 0,
+      isEdited: false
+    };
   }));
+
+  return processedData;
 };
 
 export const parseHistoricalData = (data: ArrayBuffer): HistoricalData[] => {

@@ -57,7 +57,7 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-full mx-auto">
           <div className="bg-white rounded-lg shadow-lg p-6 mb-8 border border-gray-200">
             <div className="flex justify-between items-center mb-6">
               {steps.map((label, index) => (

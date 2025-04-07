@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { UploadCloud, FileSpreadsheet, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { parseInventoryReport, Plan } from '@/utils/excelParser';
+import { savePlanToFirebase } from '@/utils/firebaseOperations';
 
 interface FileUploadProps {
   onProcessed: (data: {
@@ -25,17 +26,17 @@ export default function FileUpload({ onProcessed }: FileUploadProps) {
   const inventoryInputRef = useRef<HTMLInputElement>(null);
   const historicalInputRef = useRef<HTMLInputElement>(null);
 
-  const processInventoryFile = (file: File) => {
+  const processInventoryFile = async (file: File) => {
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
         const data = e.target?.result;
         if (!data) {
           throw new Error("Failed to read file");
         }
         
-        // Use the parseInventoryReport function
-        const parsedData = parseInventoryReport(data as ArrayBuffer);
+        // Use the async parseInventoryReport function
+        const parsedData = await parseInventoryReport(data as ArrayBuffer);
         
         if (parsedData.length === 0) {
           throw new Error("No data found in file. Please check if the file is empty.");
@@ -45,15 +46,15 @@ export default function FileUpload({ onProcessed }: FileUploadProps) {
         const invalidPlans = parsedData.filter(plan => !plan.planId || !plan.subcategory);
         
         if (invalidPlans.length > 0) {
-          console.log('Invalid plans:', invalidPlans); // Debug logging
-          throw new Error(`Found ${invalidPlans.length} plans with missing Plan ID or Subcategory. Please check your column names (should be 'planId' and 'subcategory').`);
+          console.log('Invalid plans:', invalidPlans);
+          throw new Error(`Found ${invalidPlans.length} plans with missing Plan ID or Subcategory.`);
         }
         
         setInventoryData(parsedData);
         
       } catch (err) {
         console.error("Error processing file:", err);
-        setError(err instanceof Error ? err.message : "Failed to process inventory file. Please check file format.");
+        setError(err instanceof Error ? err.message : "Failed to process inventory file.");
       }
     };
     reader.readAsArrayBuffer(file);
@@ -106,29 +107,33 @@ export default function FileUpload({ onProcessed }: FileUploadProps) {
     }
   };
 
-  const handleSubmit = () => {
-    if (!inventoryFile || !historicalFile) {
+  const handleSubmit = async () => {
+    if (!inventoryFile || !historicalFile || !inventoryData) {
       setError('Please upload both files');
       return;
     }
 
-    if (!inventoryData || inventoryData.length === 0) {
-      setError('No valid plan data found in inventory file');
-      return;
-    }
-
     setIsLoading(true);
-    
-    // Simulate API call for demo
-    setTimeout(() => {
-      setIsLoading(false);
-      if (onProcessed && inventoryData) {
+    try {
+      // Save all edited plans to Firebase
+      const savePromises = inventoryData
+        .filter(plan => plan.isEdited)
+        .map(plan => savePlanToFirebase(plan));
+      
+      await Promise.all(savePromises);
+
+      if (onProcessed) {
         onProcessed({ 
           inventoryData: inventoryData,
           resultFile: 'sample-result.xlsx'
         });
       }
-    }, 1500);
+    } catch (error) {
+      console.error('Error saving plans:', error);
+      setError('Failed to save plans to database');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
