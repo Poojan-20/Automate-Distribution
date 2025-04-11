@@ -17,7 +17,6 @@ export interface Plan {
   isEdited?: boolean; // Flag to track if user has edited this plan
   distributionCount?: number; // New field for Mandatory tag
   clicksToBeDelivered?: number; // New field for FOC tag
-  avgRevenue?: number; // Average revenue from historical data
 }
 
 export interface HistoricalData {

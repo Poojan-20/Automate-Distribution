@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plan, parseHistoricalData, parseInventoryReport, HistoricalData } from '@/utils/excelParser';
+import { Plan } from '@/utils/excelParser';
 import PlanTable from './PlanTable';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
@@ -16,67 +16,18 @@ interface DataReviewProps {
 
 const DataReview: React.FC<DataReviewProps> = ({ inventoryData, historicalFile, onSubmit }) => {
   const [plans, setPlans] = useState<Plan[]>([]);
-  const [historicalData, setHistoricalData] = useState<HistoricalData[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [warning, setWarning] = useState<string | null>(null);
   const [firebaseSaveStatus, setFirebaseSaveStatus] = useState<{success: number; failed: number}>({ success: 0, failed: 0 });
 
-  // Load historical data
+  // Initialize with the inventory data
   useEffect(() => {
-    const loadHistoricalData = async () => {
-      try {
-        const buffer = await historicalFile.arrayBuffer();
-        const parsedData = parseHistoricalData(buffer);
-        console.log(`Parsed ${parsedData.length} historical data records`);
-        setHistoricalData(parsedData);
-      } catch (err) {
-        console.error('Error loading historical data:', err);
-        setError('Failed to load historical data');
-      }
-    };
-    
-    if (historicalFile) {
-      loadHistoricalData();
-    }
-  }, [historicalFile]);
-
-  // Calculate average revenue and merge with inventory data
-  useEffect(() => {
-    if (inventoryData.length > 0 && historicalData.length > 0) {
-      // Group historical data by plan ID and publisher
-      const revenueByPlan = historicalData.reduce((acc, item) => {
-        const key = item.planId;
-        if (!acc[key]) {
-          acc[key] = { totalRevenue: 0, count: 0 };
-        }
-        acc[key].totalRevenue += item.revenue || 0;
-        acc[key].count += 1;
-        return acc;
-      }, {} as Record<string, { totalRevenue: number; count: number }>);
-
-      // Merge with inventory data
-      const enrichedPlans = inventoryData.map(plan => {
-        const revenueData = revenueByPlan[plan.planId];
-        const avgRevenue = revenueData 
-          ? revenueData.count > 0 
-            ? revenueData.totalRevenue / revenueData.count 
-            : 0 
-          : 0;
-        
-        return {
-          ...plan,
-          avgRevenue: avgRevenue
-        };
-      });
-
-      console.log('Enriched plans with average revenue:', enrichedPlans);
-      setPlans(enrichedPlans);
-    } else {
+    if (inventoryData && inventoryData.length > 0) {
       setPlans(inventoryData);
     }
-  }, [inventoryData, historicalData]);
+  }, [inventoryData]);
 
   // Update a specific plan
   const handlePlanUpdate = (updatedPlan: Plan) => {

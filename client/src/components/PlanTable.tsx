@@ -167,7 +167,6 @@ const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanUpdate }) => {
               <TableHead className="font-semibold text-black whitespace-nowrap">Plan ID</TableHead>
               <TableHead className="font-semibold text-black whitespace-nowrap">Publisher</TableHead>
               <TableHead className="font-semibold text-black whitespace-nowrap">Budget Cap</TableHead>
-              <TableHead className="font-semibold text-black whitespace-nowrap">Avg Revenue</TableHead>
               <TableHead className="font-semibold text-black whitespace-nowrap">Brand Name</TableHead>
               <TableHead className="font-semibold text-black whitespace-nowrap">Subcategory</TableHead>
               <TableHead className="font-semibold text-black whitespace-nowrap">Tags & Requirements</TableHead>
@@ -223,11 +222,6 @@ const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanUpdate }) => {
                     placeholder="0"
                     className="bg-white text-black text-md py-2 px-2 w-full"
                   />
-                </TableCell>
-                <TableCell className="min-w-[150px]">
-                  {plan.avgRevenue ? 
-                    <div className="text-black font-medium">{Math.round(plan.avgRevenue).toLocaleString()}</div> : 
-                    <div className="text-gray-400 italic">No data</div>}
                 </TableCell>
                 <TableCell className="text-black whitespace-nowrap">{plan.brand_name}</TableCell>
                 <TableCell className="text-black whitespace-nowrap">{plan.subcategory}</TableCell>
