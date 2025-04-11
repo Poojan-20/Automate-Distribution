@@ -2,24 +2,27 @@
 import { useState } from "react";
 import FileUpload from "@/components/FileUpload";
 import DataReview from "@/components/DataReview";
-import { Stepper, Step, StepLabel } from "@/components/ui/stepper";
+import ResultsView from "@/components/ResultsView";
 import { Plan } from "@/utils/excelParser";
 
 // Define the data type for handleFileProcessed
 interface ProcessedData {
   inventoryData: Plan[];
   resultFile: string;
+  historicalFile: File;
 }
 
 export default function Home() {
   const [activeStep, setActiveStep] = useState(0);
   const [inventoryData, setInventoryData] = useState<Plan[] | null>(null);
+  const [historicalFile, setHistoricalFile] = useState<File | null>(null);
   const [resultFile, setResultFile] = useState<string | null>(null);
 
   const steps = ['Upload Files', 'Review & Complete Data', 'View Results'];
 
   const handleFileProcessed = (data: ProcessedData) => {
     setInventoryData(data.inventoryData);
+    setHistoricalFile(data.historicalFile);
     setResultFile(data.resultFile);
     setActiveStep(1);
   };
@@ -34,6 +37,10 @@ export default function Home() {
     if (stepIndex < activeStep) {
       setActiveStep(stepIndex);
     }
+  };
+
+  const handleStartOver = () => {
+    setActiveStep(0);
   };
 
   return (
@@ -96,36 +103,19 @@ export default function Home() {
               <FileUpload onProcessed={handleFileProcessed} />
             )}
             
-            {activeStep === 1 && inventoryData && (
+            {activeStep === 1 && inventoryData && historicalFile && (
               <DataReview
                 inventoryData={inventoryData}
+                historicalFile={historicalFile}
                 onSubmit={handleDataSubmitted}
               />
             )}
 
-            {activeStep === 2 && (
-              <div className="bg-white rounded-lg shadow-lg p-8 text-center">
-                <h2 className="text-2xl font-semibold mb-4">Results</h2>
-                <p className="mb-6 text-gray-600">Distribution plan generated successfully!</p>
-                
-                {resultFile && (
-                  <div className="mb-6">
-                    <p className="text-sm text-gray-500 mb-2">
-                      Results file: {resultFile}
-                    </p>
-                    <button className="text-blue-600 hover:text-blue-700 underline">
-                      Download Results
-                    </button>
-                  </div>
-                )}
-                
-                <button 
-                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                  onClick={() => setActiveStep(0)}
-                >
-                  Start Over
-                </button>
-              </div>
+            {activeStep === 2 && resultFile && (
+              <ResultsView 
+                resultFile={resultFile}
+                onStartOver={handleStartOver}
+              />
             )}
           </div>
         </div>

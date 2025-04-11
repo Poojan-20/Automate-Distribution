@@ -1,0 +1,16 @@
+plan_id,publisher,subcategory,tags,budget_cap,clicks_to_be_delivered,distribution_count
+Plan_1,Publisher_1,Technology,Mandatory,,,6697.0
+Plan_2,Publisher_1,Technology,Paid,1472.0,,
+Plan_3,Publisher_1,Entertainment,Paid,1636.0,,
+Plan_4,Publisher_1,Technology,FOC,,1738.0,
+Plan_5,Publisher_1,Technology,Paid,1833.0,,
+Plan_6,Publisher_2,Technology,Mandatory,,,13280.0
+Plan_7,Publisher_2,Technology,FOC,,604.0,
+Plan_8,Publisher_2,Travel,Paid,4397.0,,
+Plan_9,Publisher_2,Finance,FOC,,507.0,
+Plan_10,Publisher_2,Health,FOC,,1804.0,
+Plan_11,Publisher_3,Health,FOC,,1404.0,
+Plan_12,Publisher_3,Travel,Mandatory,,,14189.0
+Plan_13,Publisher_3,Finance,Paid,1308.0,,
+Plan_14,Publisher_3,Health,Mandatory,,,13938.0
+Plan_15,Publisher_3,Technology,Paid,3385.0,,

@@ -17,6 +17,7 @@ export const savePlanToFirebase = async (plan: Plan) => {
       tags: plan.tags,
       publisher: plan.publisher,
       subcategory: plan.subcategory,
+      brand_name: plan.brand_name,
       timestamp: Timestamp.now()
     };
 
@@ -75,6 +76,7 @@ export const getLatestPlanData = async (planId: string): Promise<Plan | null> =>
         tags: data.tags || [],
         publisher: data.publisher || [],
         subcategory: data.subcategory,
+        brand_name: data.brand_name || '',
         distributionCount: data.distributionCount || 0,
         clicksToBeDelivered: data.clicksToBeDelivered || 0,
         isEdited: false

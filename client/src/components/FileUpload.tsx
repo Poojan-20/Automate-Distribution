@@ -13,6 +13,7 @@ interface FileUploadProps {
   onProcessed: (data: {
     inventoryData: Plan[];
     resultFile: string;
+    historicalFile: File;
   }) => void;
 }
 
@@ -27,33 +28,45 @@ export default function FileUpload({ onProcessed }: FileUploadProps) {
   const historicalInputRef = useRef<HTMLInputElement>(null);
 
   const processInventoryFile = async (file: File) => {
+    console.log('Processing inventory file:', {
+      name: file.name,
+      type: file.type,
+      size: file.size
+    });
+
     const reader = new FileReader();
     reader.onload = async (e) => {
       try {
         const data = e.target?.result;
         if (!data) {
+          console.error('Failed to read file data');
           throw new Error("Failed to read file");
         }
+        console.log('File data loaded, size:', (data as ArrayBuffer).byteLength);
         
         // Use the async parseInventoryReport function
         const parsedData = await parseInventoryReport(data as ArrayBuffer);
+        console.log('Parsed inventory data:', parsedData);
         
         if (parsedData.length === 0) {
+          console.error('No data found in parsed inventory file');
           throw new Error("No data found in file. Please check if the file is empty.");
         }
         
         // Check if required fields are present and valid
         const invalidPlans = parsedData.filter(plan => !plan.planId || !plan.subcategory);
+        console.log('Invalid plans found:', invalidPlans);
         
         if (invalidPlans.length > 0) {
-          console.log('Invalid plans:', invalidPlans);
+          console.error(`Found ${invalidPlans.length} invalid plans:`, invalidPlans);
           throw new Error(`Found ${invalidPlans.length} plans with missing Plan ID or Subcategory.`);
         }
         
         setInventoryData(parsedData);
+        console.log('Inventory data set successfully');
         
       } catch (err) {
-        console.error("Error processing file:", err);
+        console.error("Error processing inventory file:", err);
         setError(err instanceof Error ? err.message : "Failed to process inventory file.");
       }
     };
@@ -109,27 +122,41 @@ export default function FileUpload({ onProcessed }: FileUploadProps) {
 
   const handleSubmit = async () => {
     if (!inventoryFile || !historicalFile || !inventoryData) {
+      console.error('Missing required files:', {
+        inventoryFile: !!inventoryFile,
+        historicalFile: !!historicalFile,
+        inventoryData: !!inventoryData
+      });
       setError('Please upload both files');
       return;
     }
 
+    console.log('Starting submit process with files:', {
+      inventoryFileName: inventoryFile.name,
+      historicalFileName: historicalFile.name,
+      inventoryDataCount: inventoryData.length
+    });
+
     setIsLoading(true);
     try {
       // Save all edited plans to Firebase
-      const savePromises = inventoryData
-        .filter(plan => plan.isEdited)
-        .map(plan => savePlanToFirebase(plan));
+      const editedPlans = inventoryData.filter(plan => plan.isEdited);
+      console.log(`Saving ${editedPlans.length} edited plans to Firebase`);
       
+      const savePromises = editedPlans.map(plan => savePlanToFirebase(plan));
       await Promise.all(savePromises);
+      console.log('All edited plans saved successfully');
 
       if (onProcessed) {
+        console.log('Calling onProcessed callback with data');
         onProcessed({ 
           inventoryData: inventoryData,
-          resultFile: 'sample-result.xlsx'
+          resultFile: 'sample-result.xlsx',
+          historicalFile: historicalFile
         });
       }
     } catch (error) {
-      console.error('Error saving plans:', error);
+      console.error('Error in submit process:', error);
       setError('Failed to save plans to database');
     } finally {
       setIsLoading(false);
