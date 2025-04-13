@@ -1,17 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { Plan } from '@/utils/excelParser';
+import { Plan, HistoricalData, parseHistoricalData } from '@/utils/excelParser';
 import PlanTable from './PlanTable';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle, CheckCircle, AlertTriangle } from 'lucide-react';
+import { 
+  AlertCircle, 
+  CheckCircle, 
+  AlertTriangle, 
+  FileCheck, 
+  ArrowRight,
+  BarChart,
+  Loader2
+} from 'lucide-react';
 import { apiService } from '@/utils/apiService';
 import { savePlanToFirebase } from '@/utils/firebaseOperations';
 
 interface DataReviewProps {
   inventoryData: Plan[];
   historicalFile: File;
-  onSubmit: (result: { resultFile: string }) => void;
+  onSubmit: (resultFile: string, performanceReport?: string) => void;
 }
 
 const DataReview: React.FC<DataReviewProps> = ({ inventoryData, historicalFile, onSubmit }) => {
@@ -21,13 +29,56 @@ const DataReview: React.FC<DataReviewProps> = ({ inventoryData, historicalFile, 
   const [success, setSuccess] = useState<string | null>(null);
   const [warning, setWarning] = useState<string | null>(null);
   const [firebaseSaveStatus, setFirebaseSaveStatus] = useState<{success: number; failed: number}>({ success: 0, failed: 0 });
+  const [loadingStats, setLoadingStats] = useState<boolean>(true);
 
   // Initialize with the inventory data
   useEffect(() => {
     if (inventoryData && inventoryData.length > 0) {
       setPlans(inventoryData);
+
+      // Load historical data and calculate average revenue
+      const calculateAverageRevenue = async () => {
+        try {
+          setLoadingStats(true);
+          const historicalBuffer = await historicalFile.arrayBuffer();
+          const processedHistoricalData = parseHistoricalData(historicalBuffer);
+          
+          // Group by planId and publisher to calculate average revenue
+          const revenueByPlan: Record<string, { totalRevenue: number; count: number }> = {};
+          
+          processedHistoricalData.forEach((record: HistoricalData) => {
+            const key = record.planId;
+            if (!revenueByPlan[key]) {
+              revenueByPlan[key] = {
+                totalRevenue: 0,
+                count: 0
+              };
+            }
+            revenueByPlan[key].totalRevenue += record.revenue;
+            revenueByPlan[key].count += 1;
+          });
+          
+          // Apply average revenue to each plan
+          const updatedPlans = inventoryData.map(plan => {
+            const planData = revenueByPlan[plan.planId];
+            if (planData && planData.count > 0) {
+              const avgRevenue = Math.round(planData.totalRevenue / planData.count);
+              return { ...plan, avgRevenue };
+            }
+            return plan;
+          });
+          
+          setPlans(updatedPlans);
+        } catch (error) {
+          console.error('Error calculating average revenue:', error);
+        } finally {
+          setLoadingStats(false);
+        }
+      };
+      
+      calculateAverageRevenue();
     }
-  }, [inventoryData]);
+  }, [inventoryData, historicalFile]);
 
   // Update a specific plan
   const handlePlanUpdate = (updatedPlan: Plan) => {
@@ -119,6 +170,7 @@ const DataReview: React.FC<DataReviewProps> = ({ inventoryData, historicalFile, 
       // Save all plans to Firebase first
       const saveStatus = await saveAllPlansToFirebase();
       setFirebaseSaveStatus(saveStatus);
+      console.log(firebaseSaveStatus);
       
       // Continue with processing even if some Firebase saves failed
       // Convert plans data to CSV format
@@ -145,10 +197,11 @@ const DataReview: React.FC<DataReviewProps> = ({ inventoryData, historicalFile, 
       const userInputFile = new File([csvBlob], 'user_input.csv', { type: 'text/csv' });
 
       // Process data using the Flask API
-      const result = await apiService.processData(historicalFile, userInputFile);
+      await apiService.processData(historicalFile, userInputFile);
 
       // Generate a timestamp-based result file name
-      const resultFile = `rankings_${new Date().getTime()}.xlsx`;
+      const resultFile = `final_planner_ranking.xlsx`;
+      const performanceReport = `overall_performance_report.xlsx`;
 
       // Set success message including Firebase status
       let successMessage = `Successfully processed ${plans.length} plans.`;
@@ -160,7 +213,7 @@ const DataReview: React.FC<DataReviewProps> = ({ inventoryData, historicalFile, 
       }
       
       setSuccess(successMessage);
-      onSubmit({ resultFile });
+      onSubmit(resultFile, performanceReport);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to process plans');
     } finally {
@@ -168,44 +221,94 @@ const DataReview: React.FC<DataReviewProps> = ({ inventoryData, historicalFile, 
     }
   };
 
+  // Count plans with complete data
+  const getCompletePlansCount = () => {
+    return plans.filter(plan => {
+      // Basic requirements for all plans
+      if (!plan.publisher || plan.publisher.length === 0 || plan.budgetCap === undefined) {
+        return false;
+      }
+      
+      // Additional requirements based on tags
+      if (plan.tags.includes('Mandatory') && plan.distributionCount === undefined) {
+        return false;
+      }
+      
+      if (plan.tags.includes('FOC') && plan.clicksToBeDelivered === undefined) {
+        return false;
+      }
+      
+      return true;
+    }).length;
+  };
+
   return (
-    <Card className="bg-white rounded-lg shadow-lg  mx-auto">
-      <CardHeader className="border-b border-gray-100">
-        <CardTitle className="text-xl font-semibold text-gray-800">Review Data</CardTitle>
-        <CardDescription className="text-gray-600">
-          Review and validate the extracted data before processing
+    <Card className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+      <CardHeader className="border-b border-gray-100 bg-gradient-to-r from-indigo-50 to-violet-50 px-6 py-5">
+        <CardTitle className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+          <FileCheck className="h-5 w-5 text-violet-600" strokeWidth={2} />
+          Review Data
+        </CardTitle>
+        <CardDescription className="text-gray-600 mt-1">
+          Review and complete the extracted data before generating rankings
         </CardDescription>
       </CardHeader>
       
-      <CardContent className="p-2 md:p-6 space-y-6">
+      <CardContent className="p-6 space-y-6">
         <div className="flex flex-col gap-4">
           {error && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
+            <Alert variant="destructive" className="border-red-200 bg-red-50 text-red-800">
+              <AlertCircle className="h-4 w-4 text-red-600" />
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
           
           {warning && (
-            <Alert className="bg-yellow-50 text-yellow-800 border-yellow-200">
-              <AlertTriangle className="h-4 w-4 text-yellow-600" />
+            <Alert className="border-amber-200 bg-amber-50 text-amber-800">
+              <AlertTriangle className="h-4 w-4 text-amber-600" />
               <AlertDescription>{warning}</AlertDescription>
             </Alert>
           )}
           
           {success && (
-            <Alert className="bg-green-50 text-green-800 border-green-200">
-              <CheckCircle className="h-4 w-4 text-green-600" />
+            <Alert className="border-emerald-200 bg-emerald-50 text-emerald-800">
+              <CheckCircle className="h-4 w-4 text-emerald-600" />
               <AlertDescription>{success}</AlertDescription>
             </Alert>
           )}
         </div>
 
-        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-          <h3 className="text-lg font-medium text-gray-800 mb-2">Data Summary</h3>
-          <p className="text-sm text-gray-600">
-            {plans.length} plan(s) found in the files
-          </p>
+        <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
+          <h3 className="text-lg font-medium text-gray-800 mb-3 flex items-center gap-2">
+            <BarChart className="h-5 w-5 text-violet-600" />
+            Data Summary
+          </h3>
+          
+          {loadingStats ? (
+            <div className="flex items-center text-gray-500 gap-2">
+              <Loader2 className="animate-spin h-4 w-4" />
+              <span>Calculating statistics...</span>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+                <div className="text-sm text-gray-500 mb-1">Total Plans</div>
+                <div className="text-2xl font-bold text-gray-800">{plans.length}</div>
+              </div>
+              
+              <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+                <div className="text-sm text-gray-500 mb-1">Complete Plans</div>
+                <div className="text-2xl font-bold text-violet-700">{getCompletePlansCount()}</div>
+              </div>
+              
+              <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+                <div className="text-sm text-gray-500 mb-1">Completion Rate</div>
+                <div className="text-2xl font-bold text-emerald-600">
+                  {plans.length > 0 ? Math.round((getCompletePlansCount() / plans.length) * 100) : 0}%
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="w-full overflow-x-auto">
@@ -213,22 +316,22 @@ const DataReview: React.FC<DataReviewProps> = ({ inventoryData, historicalFile, 
         </div>
       </CardContent>
       
-      <CardFooter className="bg-gray-50 border-t border-gray-100 p-4 md:p-6">
+      <CardFooter className="bg-gray-50 border-t border-gray-100 px-6 py-5">
         <Button 
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 md:py-3"
+          className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white py-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 font-medium text-base"
           onClick={handleProcessData}
           disabled={isSubmitting || !plans || plans.length === 0}
         >
           {isSubmitting ? (
-            <>
-              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
+            <div className="flex items-center justify-center gap-2">
+              <Loader2 className="animate-spin h-5 w-5" />
               Processing...
-            </>
+            </div>
           ) : (
-            'Process & Generate Rankings'
+            <div className="flex items-center justify-center gap-2">
+              <span>Process & Generate Rankings</span>
+              <ArrowRight className="h-5 w-5" />
+            </div>
           )}
         </Button>
       </CardFooter>
@@ -236,4 +339,4 @@ const DataReview: React.FC<DataReviewProps> = ({ inventoryData, historicalFile, 
   );
 };
 
-export default DataReview; 
+export default DataReview;

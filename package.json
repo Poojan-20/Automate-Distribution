@@ -6,7 +6,14 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "api:install": "pip install -r api/requirements.txt",
+    "api:dev": "cd api && python -m flask --app index run --port=5328 --debug",
+    "api:dev:alt": "cd api && python wsgi.py",
+    "dev:all": "concurrently \"npm run dev\" \"npm run api:dev\"",
+    "dev:all:alt": "concurrently \"npm run dev\" \"npm run api:dev:alt\"",
+    "setup": "node scripts/setup-dev.js",
+    "test:api": "node scripts/test-api.js"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -19,6 +26,7 @@
     "axios": "^1.8.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "concurrently": "^8.2.2",
     "firebase": "^11.6.0",
     "lucide-react": "^0.487.0",
     "next": "15.2.4",

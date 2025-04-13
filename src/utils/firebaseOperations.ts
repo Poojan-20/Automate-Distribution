@@ -32,7 +32,7 @@ export const savePlanToFirebase = async (plan: Plan) => {
     }
 
     // Validate if the plan should be saved
-    if (!plan.publisher || plan.publisher.length === 0 || plan.budgetCap <= 0) {
+    if (!plan.publisher || plan.publisher.length === 0 || (plan.budgetCap !== undefined && plan.budgetCap <= 0)) {
       throw new Error(`Plan ${plan.planId} is missing required fields`);
     }
 
