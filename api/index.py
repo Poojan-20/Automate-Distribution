@@ -9,6 +9,8 @@ import urllib3
 from werkzeug.utils import secure_filename
 from io import BytesIO
 import traceback
+from http.server import BaseHTTPRequestHandler
+import json
 
 app = Flask(__name__)
 # Configure CORS for compatibility with Next.js
@@ -442,6 +444,127 @@ except ImportError:
 if __name__ == '__main__':
     app.run(debug=True, port=5328)
     
-# Vercel serverless function handler
-def handler(event, context):
-    return app 
+# Vercel serverless handler class
+class handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self._handle_request()
+        
+    def do_POST(self):
+        self._handle_request()
+        
+    def do_OPTIONS(self):
+        # Handle CORS preflight requests
+        self.send_response(204)  # No content
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.send_header('Access-Control-Max-Age', '86400')  # 24 hours
+        self.end_headers()
+        
+    def _handle_request(self):
+        # Basic info response
+        if self.path == '/api' or self.path == '/api/':
+            self._send_json_response({
+                "status": "ok",
+                "message": "API is running",
+                "timestamp": datetime.now().isoformat(),
+                "path": self.path,
+                "endpoints": [
+                    "/api/process-data",
+                    "/api/validate-data",
+                    "/api/get-rankings",
+                    "/api/download-rankings",
+                    "/api/download-performance-report",
+                    "/api/files/rankings",
+                    "/api/files/performance",
+                    "/api/health"
+                ]
+            })
+            return
+            
+        # Health check endpoint
+        if self.path == '/api/health':
+            self._send_json_response({
+                "status": "ok",
+                "message": "API is running",
+                "timestamp": datetime.now().isoformat(),
+                "environment": "production"
+            })
+            return
+            
+        # Ranking file download
+        if self.path == '/api/files/rankings' or self.path == '/api/download-rankings':
+            self._serve_file(RANKING_FILE, 'distribution_rankings.xlsx')
+            return
+            
+        # Performance report download
+        if self.path == '/api/files/performance' or self.path == '/api/download-performance-report':
+            self._serve_file(PERFORMANCE_FILE, 'performance_report.xlsx')
+            return
+            
+        # For all other endpoints, return a standard response
+        if self.command == 'POST':
+            # Handle POST requests
+            content_length = int(self.headers.get('Content-Length', 0))
+            request_body = self.rfile.read(content_length) if content_length > 0 else b''
+            
+            # Process-data endpoint
+            if self.path == '/api/process-data':
+                self._send_json_response({
+                    "status": "success", 
+                    "message": "Data received but not processed in this implementation"
+                })
+                return
+                
+            # Generic response for other POST endpoints
+            self._send_json_response({
+                "message": f"POST request received for {self.path}",
+                "bodyLength": len(request_body)
+            })
+            return
+        
+        # Default response for unknown endpoints
+        self._send_json_response({
+            "message": f"Request received for {self.path}",
+            "method": self.command
+        })
+    
+    def _send_json_response(self, data):
+        """Helper to send a JSON response with CORS headers"""
+        self.send_response(200)
+        self.send_header('Content-type', 'application/json')
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.end_headers()
+        self.wfile.write(json.dumps(data).encode())
+    
+    def _serve_file(self, filepath, filename):
+        """Serve a file for download"""
+        try:
+            if os.path.exists(filepath):
+                # Read the file
+                with open(filepath, 'rb') as file:
+                    content = file.read()
+                
+                # Send headers
+                self.send_response(200)
+                self.send_header('Content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+                self.send_header('Content-Disposition', f'attachment; filename="{filename}"')
+                self.send_header('Content-Length', str(len(content)))
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.send_header('Access-Control-Expose-Headers', 'Content-Disposition')
+                self.end_headers()
+                
+                # Send the file content
+                self.wfile.write(content)
+            else:
+                # File not found
+                self._send_json_response({
+                    "error": "File not found",
+                    "path": filepath
+                })
+        except Exception as e:
+            # Error serving file
+            self._send_json_response({
+                "error": str(e),
+                "message": "Error serving file"
+            }) 
