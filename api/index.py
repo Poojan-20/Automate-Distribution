@@ -283,12 +283,8 @@ def process_data():
                 missing_fields.append('user_input')
             return jsonify({"error": f"Missing required data: {', '.join(missing_fields)}"}), 400
         
-        # Import PlannerRankerSystem here to avoid circular imports
-        try:
-            from .planner import PlannerRankerSystem
-        except ImportError as e:
-            print(f"Error importing PlannerRankerSystem: {str(e)}")
-            return jsonify({"error": f"Internal server error: {str(e)}"}), 500
+        # Use the local PlannerRankerSystem class instead of importing
+        # No need to import from planner.py anymore
         
         # Save JSON data to temporary files
         try:
@@ -408,9 +404,11 @@ def health_check():
     try:
         return jsonify({
             "status": "ok",
-            "message": "API is running",
+            "message": "Revenue Planner API is running",
+            "description": "Manage your plans and rankings with powerful data-driven decision making",
             "timestamp": datetime.now().isoformat(),
-            "environment": "production" if IS_SERVERLESS else "development"
+            "environment": "production" if IS_SERVERLESS else "development",
+            "version": "1.0.0"
         })
     except Exception as e:
         logger.exception(f"Error in health check: {str(e)}")
@@ -418,15 +416,12 @@ def health_check():
 
 # Import routes from routes.py - use relative import
 try:
-    from .routes import routes as blueprint_routes
-    app.register_blueprint(blueprint_routes)
+    # We don't need to import routes anymore as all functionality is integrated
+    # directly in this file
+    pass
 except ImportError:
     # Fallback for local development
-    try:
-        from .routes import routes as blueprint_routes
-        app.register_blueprint(blueprint_routes)
-    except ImportError:
-        logger.error("Failed to import routes blueprint. API functionality will be limited.")
+    logger.error("Failed to import routes blueprint. API functionality will be limited.")
 
 # For local development
 if __name__ == '__main__':
@@ -454,9 +449,11 @@ class handler(BaseHTTPRequestHandler):
         if self.path == '/api/health':
             self._send_json_response({
                 "status": "ok",
-                "message": "API is running",
+                "message": "Revenue Planner API is running",
+                "description": "Manage your plans and rankings with powerful data-driven decision making",
                 "timestamp": datetime.now().isoformat(),
-                "environment": "production" if IS_SERVERLESS else "development"
+                "environment": "production" if IS_SERVERLESS else "development",
+                "version": "1.0.0"
             })
             return
             
@@ -488,18 +485,18 @@ class handler(BaseHTTPRequestHandler):
         if self.path == '/api' or self.path == '/api/':
             self._send_json_response({
                 "status": "ok",
-                "message": "API is running",
+                "message": "Revenue Planner API is running",
+                "description": "Manage your plans and rankings with powerful data-driven decision making",
                 "timestamp": datetime.now().isoformat(),
                 "endpoints": [
                     "/api/process-data",
                     "/api/validate-data",
                     "/api/get-rankings",
-                    "/api/download-rankings",
-                    "/api/download-performance-report",
                     "/api/files/rankings",
                     "/api/files/performance",
                     "/api/health"
-                ]
+                ],
+                "version": "1.0.0"
             })
             return
             
