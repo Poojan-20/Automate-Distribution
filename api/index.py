@@ -407,12 +407,10 @@ from routes import routes
 # Register blueprint
 app.register_blueprint(routes)
 
-# WSGI entry point for Vercel 
-# This is what Vercel will look for
-def handler(event, context):
-    from serverless_wsgi import handle_request
-    return handle_request(app, event, context)
-
-# For local development only
+# For local development
 if __name__ == '__main__':
-    app.run(debug=True, port=5328) 
+    app.run(debug=True, port=5328)
+    
+# Vercel serverless function handler
+def handler(event, context):
+    return app 
