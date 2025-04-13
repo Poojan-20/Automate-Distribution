@@ -285,7 +285,7 @@ def process_data():
         
         # Import PlannerRankerSystem here to avoid circular imports
         try:
-            from planner import PlannerRankerSystem
+            from .planner import PlannerRankerSystem
         except ImportError as e:
             print(f"Error importing PlannerRankerSystem: {str(e)}")
             return jsonify({"error": f"Internal server error: {str(e)}"}), 500
@@ -423,7 +423,7 @@ try:
 except ImportError:
     # Fallback for local development
     try:
-        from routes import routes as blueprint_routes
+        from .routes import routes as blueprint_routes
         app.register_blueprint(blueprint_routes)
     except ImportError:
         logger.error("Failed to import routes blueprint. API functionality will be limited.")
