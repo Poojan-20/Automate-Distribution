@@ -80,6 +80,27 @@ def download_performance():
         logger.exception(f"Error serving performance report: {str(e)}")
         return jsonify({"error": "Failed to download performance report"}), 500
 
+# Add direct file endpoints matching apiService.ts
+@routes.route('/api/files/rankings', methods=['GET'])
+def files_rankings():
+    """Download rankings file - alternative endpoint"""
+    try:
+        logger.info(f"Serving rankings file from /api/files/rankings endpoint")
+        return serve_file(RANKING_FILE, f'distribution_rankings_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx')
+    except Exception as e:
+        logger.exception(f"Error serving rankings file: {str(e)}")
+        return jsonify({"error": "Failed to download rankings"}), 500
+
+@routes.route('/api/files/performance', methods=['GET'])
+def files_performance():
+    """Download performance report - alternative endpoint"""
+    try:
+        logger.info(f"Serving performance file from /api/files/performance endpoint")
+        return serve_file(PERFORMANCE_FILE, f'performance_report_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx')
+    except Exception as e:
+        logger.exception(f"Error serving performance report: {str(e)}")
+        return jsonify({"error": "Failed to download performance report"}), 500
+
 @routes.route('/api/validate-data', methods=['POST'])
 def validate_data():
     try:

@@ -63,6 +63,17 @@ logger.info(f"Output folder set to: {OUTPUT_FOLDER}")
 RANKING_FILE = os.path.join(OUTPUT_FOLDER, 'final_planner_ranking.xlsx')
 PERFORMANCE_FILE = os.path.join(OUTPUT_FOLDER, 'overall_performance_report.xlsx')
 
+# Define a function for EPC alerts that planner.py tries to import
+def check_epc_alerts(metrics):
+    """Check for significant EPC changes and send alerts if needed"""
+    try:
+        # Simple implementation - just log the metrics
+        logger.info(f"Checking EPC alerts for {len(metrics)} metrics")
+        # Actual alerting functionality would go here
+    except Exception as e:
+        logger.error(f"Error checking EPC alerts: {str(e)}")
+    return True
+
 # Variable to store the latest ranking results
 latest_rankings = {
     "all_publishers": [],
@@ -401,11 +412,31 @@ def get_rankings():
 
     return jsonify(latest_rankings)
 
-# Import routes from routes.py
-from routes import routes
+@app.route('/api/health', methods=['GET'])
+def health_check():
+    """Simple health check endpoint for debugging"""
+    try:
+        return jsonify({
+            "status": "ok",
+            "message": "API is running",
+            "timestamp": datetime.now().isoformat(),
+            "environment": "production" if IS_SERVERLESS else "development"
+        })
+    except Exception as e:
+        logger.exception(f"Error in health check: {str(e)}")
+        return jsonify({"status": "error", "message": str(e)}), 500
 
-# Register blueprint
-app.register_blueprint(routes)
+# Import routes from routes.py - use relative import
+try:
+    from .routes import routes as blueprint_routes
+    app.register_blueprint(blueprint_routes)
+except ImportError:
+    # Fallback for local development
+    try:
+        from routes import routes as blueprint_routes
+        app.register_blueprint(blueprint_routes)
+    except ImportError:
+        logger.error("Failed to import routes blueprint. API functionality will be limited.")
 
 # For local development
 if __name__ == '__main__':

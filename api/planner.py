@@ -24,12 +24,18 @@ if not os.path.exists(OUTPUT_FOLDER):
 def get_check_epc_alerts():
     """Import and return the check_epc_alerts function from index.py."""
     try:
-        from index import check_epc_alerts
+        # Try relative import first (for Vercel)
+        from .index import check_epc_alerts
         return check_epc_alerts
-    except ImportError as e:
-        logger.error(f"Error importing check_epc_alerts: {str(e)}")
-        # Return a dummy function in case of import error
-        return lambda x: logger.warning("check_epc_alerts function not available")
+    except ImportError:
+        try:
+            # Fallback to absolute import (for local development)
+            from index import check_epc_alerts
+            return check_epc_alerts
+        except ImportError as e:
+            logger.error(f"Error importing check_epc_alerts: {str(e)}")
+            # Return a dummy function in case of import error
+            return lambda x: logger.warning("check_epc_alerts function not available")
 
 class PlannerRankerSystem:
     def __init__(self, historical_data_path, user_input_path, weights=None):
@@ -309,7 +315,12 @@ class PlannerRankerSystem:
             final_data['final_rank'] = final_data['final_rank'].fillna(1)
             
             # Import save function and file paths
-            from index import save_dataframe_to_excel, RANKING_FILE
+            try:
+                # Try relative import first (for Vercel)
+                from .index import save_dataframe_to_excel, RANKING_FILE
+            except ImportError:
+                # Fallback to absolute import (for local development)
+                from index import save_dataframe_to_excel, RANKING_FILE
             
             # Save rankings file
             if not save_dataframe_to_excel(final_data, RANKING_FILE):
@@ -339,7 +350,12 @@ class PlannerRankerSystem:
             report_data = self.format_ranking_data(report_data)
             
             # Import save function and file path
-            from index import save_dataframe_to_excel, PERFORMANCE_FILE
+            try:
+                # Try relative import first (for Vercel)
+                from .index import save_dataframe_to_excel, PERFORMANCE_FILE
+            except ImportError:
+                # Fallback to absolute import (for local development)
+                from index import save_dataframe_to_excel, PERFORMANCE_FILE
             
             # Save performance report
             if not save_dataframe_to_excel(report_data, PERFORMANCE_FILE):

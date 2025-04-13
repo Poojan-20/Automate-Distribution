@@ -11,6 +11,9 @@ const API_ENDPOINTS = {
   downloadRankings: `${API_BASE_URL}/download-rankings`,
   downloadPerformanceReport: `${API_BASE_URL}/download-performance-report`,
   testSlack: `${API_BASE_URL}/test-slack`,
+  // Add endpoints defined in routes.py
+  filesRankings: `${API_BASE_URL}/files/rankings`,
+  filesPerformance: `${API_BASE_URL}/files/performance`
 };
 
 // Updated interface to match backend data structure
