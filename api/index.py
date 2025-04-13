@@ -17,7 +17,7 @@ CORS(app, resources={
         "origins": [
             "http://localhost:3000",
             "http://127.0.0.1:3000",
-            "https://automate-distribution.vercel.app"
+            "https://revenue-planner.vercel.app/"
         ],
         "methods": ["GET", "POST", "OPTIONS"],
         "allow_headers": ["Content-Type"],
