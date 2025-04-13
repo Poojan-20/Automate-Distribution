@@ -11,6 +11,8 @@ from io import BytesIO
 import traceback
 from http.server import BaseHTTPRequestHandler
 import json
+import logging
+import sys
 
 app = Flask(__name__)
 # Configure CORS for compatibility with Next.js
@@ -28,16 +30,13 @@ CORS(app, resources={
     }
 })
 
-# Setup logging
-import logging
+# Configure logging
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler()
-    ]
+    stream=sys.stdout
 )
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("api")
 logger.info("API Starting")
 
 # Get the absolute path to the client/api directory
@@ -64,17 +63,6 @@ logger.info(f"Output folder set to: {OUTPUT_FOLDER}")
 # Store file paths globally
 RANKING_FILE = os.path.join(OUTPUT_FOLDER, 'final_planner_ranking.xlsx')
 PERFORMANCE_FILE = os.path.join(OUTPUT_FOLDER, 'overall_performance_report.xlsx')
-
-# Define a function for EPC alerts that planner.py tries to import
-def check_epc_alerts(metrics):
-    """Check for significant EPC changes and send alerts if needed"""
-    try:
-        # Simple implementation - just log the metrics
-        logger.info(f"Checking EPC alerts for {len(metrics)} metrics")
-        # Actual alerting functionality would go here
-    except Exception as e:
-        logger.error(f"Error checking EPC alerts: {str(e)}")
-    return True
 
 # Variable to store the latest ranking results
 latest_rankings = {
@@ -112,11 +100,11 @@ def json_to_csv(data, filename):
             
         # Convert to DataFrame
         df = pd.DataFrame(processed_data)
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        filepath = os.path.join(UPLOAD_FOLDER, filename)
         df.to_csv(filepath, index=False)
         return filepath
     except Exception as e:
-        print(f"Error converting JSON to CSV: {str(e)}")
+        logger.error(f"Error converting JSON to CSV: {str(e)}")
         raise
 
 def save_excel_file(df: pd.DataFrame, filename: str) -> str:
@@ -462,13 +450,46 @@ class handler(BaseHTTPRequestHandler):
         self.end_headers()
         
     def _handle_request(self):
-        # Basic info response
+        # Health check endpoint
+        if self.path == '/api/health':
+            self._send_json_response({
+                "status": "ok",
+                "message": "API is running",
+                "timestamp": datetime.now().isoformat(),
+                "environment": "production" if IS_SERVERLESS else "development"
+            })
+            return
+            
+        # File download endpoints
+        if self.path in ['/api/files/rankings', '/api/download-rankings']:
+            self._serve_file(RANKING_FILE, 'distribution_rankings.xlsx')
+            return
+            
+        if self.path in ['/api/files/performance', '/api/download-performance-report']:
+            self._serve_file(PERFORMANCE_FILE, 'performance_report.xlsx')
+            return
+            
+        # Get rankings endpoint
+        if self.path == '/api/get-rankings':
+            self._handle_get_rankings()
+            return
+            
+        # Process data endpoint
+        if self.path == '/api/process-data' and self.command == 'POST':
+            self._handle_process_data()
+            return
+            
+        # Validate data endpoint
+        if self.path == '/api/validate-data' and self.command == 'POST':
+            self._handle_validate_data()
+            return
+            
+        # Basic info for root API path
         if self.path == '/api' or self.path == '/api/':
             self._send_json_response({
                 "status": "ok",
                 "message": "API is running",
                 "timestamp": datetime.now().isoformat(),
-                "path": self.path,
                 "endpoints": [
                     "/api/process-data",
                     "/api/validate-data",
@@ -482,56 +503,16 @@ class handler(BaseHTTPRequestHandler):
             })
             return
             
-        # Health check endpoint
-        if self.path == '/api/health':
-            self._send_json_response({
-                "status": "ok",
-                "message": "API is running",
-                "timestamp": datetime.now().isoformat(),
-                "environment": "production"
-            })
-            return
-            
-        # Ranking file download
-        if self.path == '/api/files/rankings' or self.path == '/api/download-rankings':
-            self._serve_file(RANKING_FILE, 'distribution_rankings.xlsx')
-            return
-            
-        # Performance report download
-        if self.path == '/api/files/performance' or self.path == '/api/download-performance-report':
-            self._serve_file(PERFORMANCE_FILE, 'performance_report.xlsx')
-            return
-            
-        # For all other endpoints, return a standard response
-        if self.command == 'POST':
-            # Handle POST requests
-            content_length = int(self.headers.get('Content-Length', 0))
-            request_body = self.rfile.read(content_length) if content_length > 0 else b''
-            
-            # Process-data endpoint
-            if self.path == '/api/process-data':
-                self._send_json_response({
-                    "status": "success", 
-                    "message": "Data received but not processed in this implementation"
-                })
-                return
-                
-            # Generic response for other POST endpoints
-            self._send_json_response({
-                "message": f"POST request received for {self.path}",
-                "bodyLength": len(request_body)
-            })
-            return
-        
         # Default response for unknown endpoints
         self._send_json_response({
-            "message": f"Request received for {self.path}",
+            "error": "Unknown endpoint",
+            "path": self.path,
             "method": self.command
-        })
+        }, status=404)
     
-    def _send_json_response(self, data):
+    def _send_json_response(self, data, status=200):
         """Helper to send a JSON response with CORS headers"""
-        self.send_response(200)
+        self.send_response(status)
         self.send_header('Content-type', 'application/json')
         self.send_header('Access-Control-Allow-Origin', '*')
         self.end_headers()
@@ -558,13 +539,207 @@ class handler(BaseHTTPRequestHandler):
                 self.wfile.write(content)
             else:
                 # File not found
+                logger.error(f"File not found: {filepath}")
                 self._send_json_response({
                     "error": "File not found",
                     "path": filepath
-                })
+                }, status=404)
         except Exception as e:
             # Error serving file
+            logger.exception(f"Error serving file: {str(e)}")
             self._send_json_response({
                 "error": str(e),
                 "message": "Error serving file"
-            }) 
+            }, status=500)
+    
+    def _handle_get_rankings(self):
+        """Handle GET /api/get-rankings endpoint"""
+        try:
+            global latest_rankings
+            
+            if not latest_rankings["all_publishers"]:
+                self._send_json_response({"error": "No ranking data available"}, status=404)
+                return
+                
+            # Ensure all required fields are present in the response
+            for record in latest_rankings["all_publishers"]:
+                record.setdefault('expected_clicks', 0)
+                record.setdefault('budget_cap', 0)
+                record.setdefault('CTR', 0)
+                record.setdefault('EPC', 0)
+                record.setdefault('avg_revenue', 0)
+                record.setdefault('distribution', 0)
+                record.setdefault('final_rank', 0)
+                record.setdefault('tags', '')
+                record.setdefault('subcategory', '')
+                
+            self._send_json_response(latest_rankings)
+            
+        except Exception as e:
+            logger.exception(f"Error getting rankings: {str(e)}")
+            self._send_json_response({"error": str(e)}, status=500)
+    
+    def _handle_process_data(self):
+        """Handle POST /api/process-data endpoint"""
+        try:
+            # Read request body
+            content_length = int(self.headers.get('Content-Length', 0))
+            request_body = self.rfile.read(content_length) if content_length > 0 else b''
+            
+            # Parse JSON data
+            data = json.loads(request_body)
+            
+            # Check required fields
+            if 'historical_data' not in data or 'user_input' not in data:
+                missing_fields = []
+                if 'historical_data' not in data:
+                    missing_fields.append('historical_data')
+                if 'user_input' not in data:
+                    missing_fields.append('user_input')
+                    
+                self._send_json_response({
+                    "error": f"Missing required data: {', '.join(missing_fields)}"
+                }, status=400)
+                return
+            
+            # Save JSON data to temporary files
+            try:
+                historical_file = json_to_csv(data['historical_data'], 'historical_data.csv')
+                user_input_file = json_to_csv(data['user_input'], 'user_input.csv')
+            except Exception as e:
+                logger.exception(f"Error processing input data: {str(e)}")
+                self._send_json_response({
+                    "error": f"Failed to process input data: {str(e)}"
+                }, status=400)
+                return
+            
+            # Get weights or use default
+            weights = data.get('weights', None)
+            logger.info(f"Using weights: {weights}")
+            
+            # Initialize the PlannerRankerSystem
+            try:
+                ranker = PlannerRankerSystem(historical_file, user_input_file, weights)
+            except Exception as e:
+                logger.exception(f"Error initializing PlannerRankerSystem: {str(e)}")
+                self._send_json_response({
+                    "error": f"Failed to initialize ranking system: {str(e)}"
+                }, status=500)
+                return
+            
+            # Execute the ranking process with detailed error handling for each step
+            try:
+                metrics = ranker.calculate_metrics()
+            except Exception as e:
+                logger.exception(f"Error calculating metrics: {str(e)}")
+                self._send_json_response({
+                    "error": f"Failed to calculate metrics: {str(e)}"
+                }, status=500)
+                return
+                
+            try:
+                ranked_data = ranker.calculate_ranks(metrics)
+            except Exception as e:
+                logger.exception(f"Error calculating ranks: {str(e)}")
+                self._send_json_response({
+                    "error": f"Failed to calculate ranks: {str(e)}"
+                }, status=500)
+                return
+                
+            try:
+                weighted_data = ranker.calculate_weighted_rank(ranked_data)
+            except Exception as e:
+                logger.exception(f"Error calculating weighted rank: {str(e)}")
+                self._send_json_response({
+                    "error": f"Failed to calculate weighted rank: {str(e)}"
+                }, status=500)
+                return
+                
+            try:
+                final_ranked_data = ranker.calculate_final_rank(weighted_data)
+            except Exception as e:
+                logger.exception(f"Error calculating final rank: {str(e)}")
+                self._send_json_response({
+                    "error": f"Failed to calculate final rank: {str(e)}"
+                }, status=500)
+                return
+                
+            try:
+                final_rankings = ranker.calculate_distribution_count(final_ranked_data)
+            except Exception as e:
+                logger.exception(f"Error calculating distribution count: {str(e)}")
+                self._send_json_response({
+                    "error": f"Failed to calculate distribution count: {str(e)}"
+                }, status=500)
+                return
+            
+            # Store the final rankings for the get-rankings endpoint
+            global latest_rankings
+            
+            # Convert the final_rankings DataFrame to a list of dictionaries
+            all_publishers_data = final_rankings.to_dict('records')
+            
+            # Group rankings by publisher and ensure all needed fields are present
+            by_publisher = {}
+            for record in all_publishers_data:
+                record.setdefault('expected_clicks', 0) 
+                record.setdefault('budget_cap', 0)
+                
+                publisher = record.get('publisher', 'Unknown')
+                if publisher not in by_publisher:
+                    by_publisher[publisher] = []
+                by_publisher[publisher].append(record)
+            
+            # Store the latest rankings
+            latest_rankings = {
+                "all_publishers": all_publishers_data,
+                "by_publisher": by_publisher
+            }
+            
+            # Check if performance report was created
+            performance_report_path = PERFORMANCE_FILE
+            performance_report_exists = os.path.exists(performance_report_path)
+            
+            # Return successful response
+            self._send_json_response({
+                "status": "success",
+                "message": "Data processed successfully",
+                "result_file": "final_planner_ranking.xlsx",
+                "performance_report": "overall_performance_report.xlsx" if performance_report_exists else None
+            })
+            
+        except Exception as e:
+            logger.exception(f"Error processing data: {str(e)}")
+            self._send_json_response({"error": str(e)}, status=500)
+    
+    def _handle_validate_data(self):
+        """Handle POST /api/validate-data endpoint"""
+        try:
+            # Read request body
+            content_length = int(self.headers.get('Content-Length', 0))
+            request_body = self.rfile.read(content_length) if content_length > 0 else b''
+            
+            # Parse JSON data
+            data = json.loads(request_body)
+            
+            if not data or 'data' not in data:
+                self._send_json_response({'error': 'No data provided'}, status=400)
+                return
+                
+            # Convert to DataFrame for validation
+            df = pd.DataFrame(data['data'])
+            logger.debug(f"Received data with {len(df)} rows and columns: {list(df.columns)}")
+            
+            # Return basic validation info
+            validation_result = {
+                'columns': list(df.columns),
+                'row_count': len(df),
+                'sample_data': df.head(5).to_dict(orient='records')
+            }
+            
+            logger.info(f"Validated data with {len(df)} rows")
+            self._send_json_response(validation_result)
+            
+        except Exception as e:
+            logger.exception(f"Error validating data: {str(e)}")
+            self._send_json_response({'error': str(e)}, status=500) 
