@@ -242,6 +242,12 @@ def serve_file(filepath: str, filename: str = None):
         error_response = jsonify({"error": str(e)}), 500
         error_response[0].headers.add('Access-Control-Allow-Origin', '*')
         return error_response
+    
+    
+@app.route('/api/test')
+def test():
+    return {"status": "working"}
+
 
 @app.route('/api/files/rankings', methods=['GET'])
 def download_rankings():
