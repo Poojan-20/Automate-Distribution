@@ -10,7 +10,10 @@ logger = logging.getLogger(__name__)
 
 # Get the absolute path to the client/api directory
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-OUTPUT_FOLDER = os.path.join(BASE_DIR, 'output')
+
+# Use /tmp for file operations when in serverless environment (Vercel)
+IS_SERVERLESS = os.environ.get('VERCEL_ENV') is not None
+OUTPUT_FOLDER = '/tmp/output' if IS_SERVERLESS else os.path.join(BASE_DIR, 'output')
 
 # Create output directory if it doesn't exist
 if not os.path.exists(OUTPUT_FOLDER):

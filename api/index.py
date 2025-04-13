@@ -17,7 +17,8 @@ CORS(app, resources={
         "origins": [
             "http://localhost:3000",
             "http://127.0.0.1:3000",
-            "https://revenue-planner.vercel.app/"
+            "https://automate-distribution.vercel.app",
+            "https://revenue-planner.vercel.app"
         ],
         "methods": ["GET", "POST", "OPTIONS"],
         "allow_headers": ["Content-Type"],
@@ -31,8 +32,7 @@ logging.basicConfig(
     level=logging.DEBUG,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.StreamHandler(),
-        logging.FileHandler('api.log')
+        logging.StreamHandler()
     ]
 )
 logger = logging.getLogger(__name__)
@@ -40,8 +40,11 @@ logger.info("API Starting")
 
 # Get the absolute path to the client/api directory
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
-OUTPUT_FOLDER = os.path.join(BASE_DIR, 'output')
+
+# Use /tmp for file operations when in serverless environment (Vercel)
+IS_SERVERLESS = os.environ.get('VERCEL_ENV') is not None
+OUTPUT_FOLDER = '/tmp/output' if IS_SERVERLESS else os.path.join(BASE_DIR, 'output')
+UPLOAD_FOLDER = '/tmp/uploads' if IS_SERVERLESS else os.path.join(BASE_DIR, 'uploads')
 
 # Create directories if they don't exist
 for folder in [UPLOAD_FOLDER, OUTPUT_FOLDER]:
@@ -354,7 +357,6 @@ def process_data():
         }
         
         # Check if performance report was created
-        OUTPUT_FOLDER = '/tmp/output' if os.environ.get('VERCEL_ENV') == 'production' else 'output'
         performance_report_path = os.path.join(OUTPUT_FOLDER, 'overall_performance_report.xlsx')
         performance_report_exists = os.path.exists(performance_report_path)
         
@@ -393,9 +395,17 @@ def get_rankings():
 
     return jsonify(latest_rankings)
 
-# Import and register routes blueprint
+# Import routes from routes.py
 from routes import routes
+
+# Register blueprint
 app.register_blueprint(routes)
+
+# WSGI entry point for Vercel 
+# This is what Vercel will look for
+def handler(event, context):
+    from serverless_wsgi import handle_request
+    return handle_request(app, event, context)
 
 # For local development only
 if __name__ == '__main__':

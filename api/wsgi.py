@@ -1,7 +1,8 @@
 from index import app
 
-# Import routes to register them with the app
-import routes
+# WSGI app for Vercel deployment
+app = app
 
+# Local development server
 if __name__ == "__main__":
     app.run(debug=True, port=5328) 

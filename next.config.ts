@@ -19,14 +19,7 @@ const nextConfig: NextConfig = {
   // Add configuration for handling large files and binary downloads
   experimental: {
     largePageDataBytes: 128 * 1000, // 128KB
-  },
-  // Increase body parser limit for file uploads
-  api: {
-    bodyParser: {
-      sizeLimit: '16mb',
-    },
-    responseLimit: false,
-  },
+  }
 };
 
 export default nextConfig;
