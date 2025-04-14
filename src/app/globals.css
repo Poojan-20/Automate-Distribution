@@ -111,10 +111,10 @@ body {
 }
 
 .rank-1 {
-  background-color: rgba(239, 68, 68, 0.15);
-  color: #dc2626; /* Red 600 */
-  border: 2px solid rgba(239, 68, 68, 0.3);
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.05);
+  background-color: rgba(5, 150, 105, 0.15);
+  color: #059669; /* Emerald 600 */
+  border: 2px solid rgba(5, 150, 105, 0.3);
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.05);
 }
 
 .rank-2 {
@@ -125,22 +125,22 @@ body {
 }
 
 .rank-3 {
-  background-color: rgba(139, 92, 246, 0.15);
-  color: #7c3aed; /* Violet 600 */
-  border: 2px solid rgba(139, 92, 246, 0.3);
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.05);
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #d97706; /* Amber 600 */
+  border: 2px solid rgba(245, 158, 11, 0.3);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.05);
 }
 
 .rank-top-10 {
-  background-color: rgba(59, 130, 246, 0.15);
-  color: #2563eb; /* Blue 600 */
-  border: 2px solid rgba(59, 130, 246, 0.3);
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #dc2626; /* Red 600 */
+  border: 2px solid rgba(239, 68, 68, 0.3);
 }
 
 .rank-regular {
-  background-color: rgba(107, 114, 128, 0.1);
-  color: #4b5563; /* Gray 600 */
-  border: 2px solid rgba(107, 114, 128, 0.15);
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #b91c1c; /* Red 700 */
+  border: 2px solid rgba(239, 68, 68, 0.15);
 }
 
 /* Gradient backgrounds */

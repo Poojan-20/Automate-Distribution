@@ -101,10 +101,12 @@ const DataReview: React.FC<DataReviewProps> = ({ inventoryData, historicalFile, 
         unfilledCount++;
       }
       
-      // Budget cap can be 0 for certain cases, so we only check if it's undefined
-      if (plan.budgetCap === undefined) {
-        isValid = false;
-        unfilledCount++;
+      // Budget cap validation - only required for Paid tag
+      if (plan.tags.includes('Paid')) {
+        if (plan.budgetCap === undefined) {
+          isValid = false;
+          unfilledCount++;
+        }
       }
       
       // Add validation for mandatory fields based on tags
@@ -224,12 +226,16 @@ const DataReview: React.FC<DataReviewProps> = ({ inventoryData, historicalFile, 
   // Count plans with complete data
   const getCompletePlansCount = () => {
     return plans.filter(plan => {
-      // Basic requirements for all plans
-      if (!plan.publisher || plan.publisher.length === 0 || plan.budgetCap === undefined) {
+      // Check if publisher is selected
+      if (!plan.publisher || plan.publisher.length === 0) {
         return false;
       }
       
-      // Additional requirements based on tags
+      // Add validation for required fields based on tags
+      if (plan.tags.includes('Paid') && plan.budgetCap === undefined) {
+        return false;
+      }
+      
       if (plan.tags.includes('Mandatory') && plan.distributionCount === undefined) {
         return false;
       }

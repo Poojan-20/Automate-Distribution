@@ -13,12 +13,14 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   // Add configuration for handling large files and binary downloads
   experimental: {
     largePageDataBytes: 128 * 1000, // 128KB
+  },
+  // Configure ESLint to disable unescaped entities rule
+  eslint: {
+    ignoreDuringBuilds: false, // Still run ESLint
+    // You can completely disable eslint during builds with ignoreDuringBuilds: true
   },
   // Add headers for CORS
   async headers() {

@@ -800,72 +800,30 @@ class PlannerRankerSystem:
         self.OUTPUT_FOLDER = OUTPUT_FOLDER
     
     def calculate_metrics(self):
-        """Calculate rolling average CTR, EPC, and Revenue for each Plan ID by Publisher"""
-        logger.info("Calculating metrics from historical data")
-        
+        """Calculate metrics from historical data"""
         try:
-            # Handle division by zero
             # Calculate CTR for each row: clicks / distribution (avoid division by zero)
             self.historical_data['CTR'] = self.historical_data.apply(
                 lambda row: row['clicks'] / row['distribution'] if row['distribution'] > 0 else 0, 
                 axis=1
             )
             
-            # Calculate EPC for each row: revenue / clicks (avoid division by zero)
-            self.historical_data['EPC'] = self.historical_data.apply(
-                lambda row: row['revenue'] / row['clicks'] if row['clicks'] > 0 else 0,
-                axis=1
-            )
-            
-            # Make sure we have a date column for calculating rolling averages
-            if 'date' not in self.historical_data.columns:
-                # If no date column exists, create one or use current system date for all rows
-                logger.warning("No date column found in historical data. Using current date for all rows.")
-                self.historical_data['date'] = pd.to_datetime('today')
-            else:
-                # Convert date column to datetime if it's not already
-                self.historical_data['date'] = pd.to_datetime(self.historical_data['date'])
-            
-            # Sort by date to properly compute rolling averages
-            self.historical_data = self.historical_data.sort_values('date')
-            
-            # Calculate 7-day rolling average EPC for each publisher and plan_id
-            epc_7day_avg = {}
-            
-            # Group by publisher and plan_id
-            for (publisher, plan_id), group in self.historical_data.groupby(['publisher', 'plan_id']):
-                if len(group) > 0:
-                    # Calculate rolling average EPC over 7 days
-                    # If we have enough data points
-                    if len(group) >= 7:
-                        rolling_epc = group['EPC'].rolling(window=7, min_periods=1).mean()
-                        avg_epc_7day = rolling_epc.iloc[-1]  # Get the most recent value
-                    else:
-                        # If we don't have 7 days of data, use all available data
-                        avg_epc_7day = group['EPC'].mean()
-                        
-                    epc_7day_avg[(publisher, plan_id)] = avg_epc_7day
-            
-            # Group by publisher and plan_id to calculate averages
+            # Group by publisher and plan_id to calculate total metrics
             metrics = self.historical_data.groupby(['publisher', 'plan_id']).agg({
-                'CTR': 'mean',
-                'EPC': 'mean',
-                'revenue': 'mean',
-                'clicks': 'sum',
-                'distribution': 'sum'
+                'CTR': 'mean',  # Average CTR
+                'revenue': 'sum',  # Total revenue
+                'clicks': 'sum',  # Total clicks
+                'distribution': 'sum'  # Total distribution
             }).reset_index()
             
-            # Add the 7-day average EPC to the metrics
-            metrics['avg_epc_7day'] = metrics.apply(
-                lambda row: epc_7day_avg.get((row['publisher'], row['plan_id']), row['EPC']),
+            # Calculate EPC as total revenue divided by total clicks
+            metrics['EPC'] = metrics.apply(
+                lambda row: row['revenue'] / row['clicks'] if row['clicks'] > 0 else 0,
                 axis=1
             )
             
             # Rename revenue column to avg_revenue for clarity
             metrics = metrics.rename(columns={'revenue': 'avg_revenue'})
-            
-            # Check for EPC alerts
-            check_epc_alerts(metrics)
             
             # Save metrics to Excel
             save_dataframe_to_excel(metrics, os.path.join(self.OUTPUT_FOLDER, 'step1_avg_metrics.xlsx'))
@@ -1097,11 +1055,18 @@ class PlannerRankerSystem:
             # Don't raise the exception, just log it to prevent breaking the main workflow
     
     def calculate_distribution_count(self, final_data):
-        """Calculate distribution count based on tags"""
-        logger.info("Calculating distribution count based on tags")
+        """Calculate distribution count based on tags and historical data ratios"""
+        logger.info("Calculating distribution count based on tags and historical ratios")
         
         # Create a list to store merged rows
         result_rows = []
+        
+        # Calculate historical totals for each publisher
+        historical_totals = self.historical_data.groupby(['publisher', 'plan_id']).agg({
+            'revenue': 'sum',
+            'clicks': 'sum',
+            'distribution': 'sum'
+        }).reset_index()
         
         # For each plan in final_data
         for _, plan_row in final_data.iterrows():
@@ -1133,39 +1098,69 @@ class PlannerRankerSystem:
                 # Add tag to merged row
                 merged_row['tags'] = tag
                 
-                # Calculate distribution count based on tag
+                # Get all publishers for this plan_id from user input
+                plan_publishers = []
+                if isinstance(user_row['publisher'], list):
+                    plan_publishers = user_row['publisher']
+                else:
+                    plan_publishers = [user_row['publisher']]
+                
+                # Filter historical totals for this plan's publishers
+                plan_historical = historical_totals[
+                    (historical_totals['plan_id'] == plan_row['plan_id']) & 
+                    (historical_totals['publisher'].isin(plan_publishers))
+                ]
+                
+                # Calculate distribution based on tag type
                 if tag == 'FOC':
-                    # FOC: clicks_to_be_delivered / CTR
-                    clicks_to_deliver = user_row.get('clicks_to_be_delivered', 0)
-                    ctr = merged_row.get('CTR', 0)
-                    # Avoid division by zero
-                    if ctr > 0 and clicks_to_deliver > 0:
-                        merged_row['distribution'] = clicks_to_deliver / ctr
+                    # FOC: Distribute clicks based on historical clicks ratio
+                    total_clicks = plan_historical['clicks'].sum()
+                    if total_clicks > 0:
+                        clicks_ratio = plan_historical[
+                            plan_historical['publisher'] == plan_row['publisher']
+                        ]['clicks'].sum() / total_clicks
+                        clicks_to_deliver = user_row.get('clicks_to_be_delivered', 0)
+                        merged_row['expected_clicks'] = round(clicks_to_deliver * clicks_ratio)
+                        merged_row['distribution'] = round(merged_row['expected_clicks'] / merged_row['CTR']) if merged_row['CTR'] > 0 else 0
                     else:
+                        merged_row['expected_clicks'] = 0
                         merged_row['distribution'] = 0
                 
                 elif tag == 'Mandatory':
-                    # Mandatory: distribution count is already provided
-                    merged_row['distribution'] = user_row.get('distribution', 0)
-                
-                elif tag == 'Paid':
-                    # Paid: (budget_cap / avg_EPC) / CTR
-                    budget_cap = user_row.get('budget_cap', 0)
-                    epc = merged_row.get('EPC', 0) 
-                    ctr = merged_row.get('CTR', 0)
-                    
-                    # Avoid division by zero
-                    if epc > 0 and ctr > 0 and budget_cap > 0:
-                        clicks_to_be_delivered = budget_cap / epc
-                        merged_row['distribution'] = clicks_to_be_delivered / ctr
+                    # Mandatory: Distribute based on historical distribution ratio
+                    total_distribution = plan_historical['distribution'].sum()
+                    if total_distribution > 0:
+                        distribution_ratio = plan_historical[
+                            plan_historical['publisher'] == plan_row['publisher']
+                        ]['distribution'].sum() / total_distribution
+                        total_distribution_count = user_row.get('distribution', 0)
+                        merged_row['distribution'] = round(total_distribution_count * distribution_ratio)
+                        merged_row['expected_clicks'] = round(merged_row['distribution'] * merged_row['CTR'])
                     else:
                         merged_row['distribution'] = 0
+                        merged_row['expected_clicks'] = 0
                 
-                # Calculate expected clicks
-                merged_row['expected_clicks'] = merged_row['distribution'] * merged_row['CTR']
-                
-                # Add budget_cap from user input
-                merged_row['budget_cap'] = user_row.get('budget_cap', 0)
+                elif tag == 'Paid':
+                    # Paid: Distribute budget based on historical revenue ratio
+                    total_revenue = plan_historical['revenue'].sum()
+                    if total_revenue > 0:
+                        revenue_ratio = plan_historical[
+                            plan_historical['publisher'] == plan_row['publisher']
+                        ]['revenue'].sum() / total_revenue
+                        total_budget = user_row.get('budget_cap', 0)
+                        merged_row['budget_cap'] = round(total_budget * revenue_ratio)
+                        # Calculate distribution based on budget and EPC
+                        if merged_row['EPC'] > 0 and merged_row['CTR'] > 0:
+                            expected_clicks = merged_row['budget_cap'] / merged_row['EPC']
+                            merged_row['expected_clicks'] = round(expected_clicks)
+                            merged_row['distribution'] = round(expected_clicks / merged_row['CTR'])
+                        else:
+                            merged_row['expected_clicks'] = 0
+                            merged_row['distribution'] = 0
+                    else:
+                        merged_row['budget_cap'] = 0
+                        merged_row['expected_clicks'] = 0
+                        merged_row['distribution'] = 0
                 
                 # Add subcategory and other user input fields
                 for col in user_row.index:

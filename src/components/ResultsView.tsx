@@ -114,14 +114,19 @@ const ResultsView: React.FC<ResultsViewProps> = ({ resultFile, performanceReport
     let badgeClass = 'rank-badge ';
     
     if (rank === 1) {
+      // Green for top rank (best)
       badgeClass += 'rank-1';
     } else if (rank === 2) {
+      // Orange/amber for middle ranks
       badgeClass += 'rank-2';
     } else if (rank === 3) {
+      // Orange/amber for middle ranks
       badgeClass += 'rank-3';
     } else if (rank <= 10) {
+      // Red for lower ranks
       badgeClass += 'rank-top-10';
     } else {
+      // Darker red for worst ranks
       badgeClass += 'rank-regular';
     }
     
@@ -162,7 +167,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ resultFile, performanceReport
             No Ranking Data Available
           </CardTitle>
           <CardDescription className="text-amber-700 mt-1">
-            We couldn't find any ranking data for your request
+            We couldn&apos;t find any ranking data for your request
           </CardDescription>
         </CardHeader>
         <CardContent className="p-8">

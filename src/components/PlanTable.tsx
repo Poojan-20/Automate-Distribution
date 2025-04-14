@@ -72,12 +72,36 @@ const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanUpdate }) => {
       return;
     }
 
-    // Otherwise set only the selected tag
+    // Create updatedPlan with the new tag
     const updatedPlan = {
       ...plans[index],
       tags: [tag],
       isEdited: true
     };
+    
+    // Reset budget cap if switching to FOC or Mandatory
+    if ((tag === 'FOC' || tag === 'Mandatory') && plans[index].tags.includes('Paid')) {
+      updatedPlan.budgetCap = undefined;
+    }
+    
+    // Update input fields based on tag
+    if (tag === 'FOC') {
+      // Ensure clicks to be delivered is initialized
+      if (updatedPlan.clicksToBeDelivered === undefined) {
+        updatedPlan.clicksToBeDelivered = 0;
+      }
+    } else if (tag === 'Mandatory') {
+      // Ensure distribution count is initialized
+      if (updatedPlan.distributionCount === undefined) {
+        updatedPlan.distributionCount = 0;
+      }
+    } else if (tag === 'Paid') {
+      // Ensure budget cap is initialized
+      if (updatedPlan.budgetCap === undefined) {
+        updatedPlan.budgetCap = 0;
+      }
+    }
+    
     onPlanUpdate(updatedPlan);
   };
 
@@ -157,7 +181,7 @@ const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanUpdate }) => {
             </span>
             {searchQuery && (
               <span className="text-xs text-violet-600 font-medium">
-                Filtering by: "{searchQuery}"
+                Filtering by: &quot;{searchQuery}&quot;
               </span>
             )}
           </div>
@@ -267,13 +291,16 @@ const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanUpdate }) => {
                       value={plan.budgetCap || ''}
                       onChange={(e) => handleBudgetChange(index, e.target.value)}
                       placeholder="0"
+                      disabled={plan.tags.includes('FOC') || plan.tags.includes('Mandatory')}
                       onWheel={(e) => e.currentTarget.blur()}
                       onKeyDown={(e) => {
                         if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
                           e.preventDefault();
                         }
                       }}
-                      className="pl-9 py-1.5 h-9 bg-white text-gray-800 border-gray-200 focus:border-violet-300 focus:ring focus:ring-violet-200 focus:ring-opacity-50"
+                      className={`pl-9 py-1.5 h-9 bg-white text-gray-800 border-gray-200 focus:border-violet-300 focus:ring focus:ring-violet-200 focus:ring-opacity-50 ${
+                        plan.tags.includes('FOC') || plan.tags.includes('Mandatory') ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
                     />
                   </div>
                 </TableCell>
