@@ -49,18 +49,50 @@ const DataReview: React.FC<DataReviewProps> = ({ inventoryData, historicalFile, 
     if (inventoryData && inventoryData.length > 0) {
       setPlans(inventoryData);
 
-      // Load historical data and calculate average revenue
+      // Load historical data and calculate average revenue by plan ID (date-wise average)
+      // This calculation intentionally ignores publisher differences and calculates
+      // the average revenue for each plan ID across all dates and publishers
       const calculateAverageRevenue = async () => {
         try {
           setLoadingStats(true);
           const historicalBuffer = await historicalFile.arrayBuffer();
           const processedHistoricalData = parseHistoricalData(historicalBuffer);
           
-          // Group by planId and publisher to calculate average revenue
+          console.log('Historical data sample:', processedHistoricalData.slice(0, 3));
+          
+          // Check if we have any data before proceeding
+          if (processedHistoricalData.length === 0) {
+            console.warn('No historical data found');
+            setLoadingStats(false);
+            return;
+          }
+          
+          // Check if this could be a format with revenue in date columns
+          // If so, we will have a relatively small number of records compared to plans
+          const uniquePlans = new Set(processedHistoricalData.map(record => record.planId));
+          const uniquePublishers = new Set(processedHistoricalData.map(record => record.publisher));
+          const uniqueDates = new Set(processedHistoricalData.map(record => {
+            if (record.date instanceof Date) {
+              // Format the date in a readable format like "Apr 14, 2025" for display/debugging
+              const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' };
+              return record.date.toLocaleDateString('en-US', options);
+            }
+            return String(record.date);
+          }));
+          
+          console.log(`Found ${uniquePlans.size} unique plans, ${uniquePublishers.size} publishers, and ${uniqueDates.size} dates`);
+          console.log(`Unique dates:`, Array.from(uniqueDates));
+          
+          // If we have very few dates (or only one record per plan/publisher), this might be a specialized format
+          // where each record already represents all dates for a plan/publisher
+          
+          // Group by planId only to calculate average revenue (ignoring publisher)
+          // This means the same average revenue will be shown for a plan ID regardless of publisher
           const revenueByPlan: Record<string, { totalRevenue: number; count: number }> = {};
           
+          // Process each record, aggregating revenue by planId (not by publisher)
           processedHistoricalData.forEach((record: HistoricalData) => {
-            const key = record.planId;
+            const key = record.planId; // Only use planId as key, ignoring publisher
             if (!revenueByPlan[key]) {
               revenueByPlan[key] = {
                 totalRevenue: 0,
@@ -69,19 +101,41 @@ const DataReview: React.FC<DataReviewProps> = ({ inventoryData, historicalFile, 
             }
             revenueByPlan[key].totalRevenue += record.revenue;
             revenueByPlan[key].count += 1;
+            
+            // Log date and revenue for debugging
+            if (record.revenue > 0) {
+              const dateFormatted = record.date instanceof Date 
+                ? record.date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+                : String(record.date);
+              console.log(`Plan ${record.planId} on ${dateFormatted}: Revenue ${record.revenue}`);
+            }
           });
           
+          // Log the revenue data for debugging
+          console.log('Revenue by plan (raw):', revenueByPlan);
+          
           // Apply average revenue to each plan
+          // For each plan, divide the total revenue by 7 days to get the correct average
           const updatedPlans = inventoryData.map(plan => {
             const planData = revenueByPlan[plan.planId];
-            if (planData && planData.count > 0) {
-              const avgRevenue = Math.round(planData.totalRevenue / planData.count);
+            if (planData && planData.totalRevenue > 0) {
+              // Divide by 7 for a 7-day average regardless of actual data points
+              const avgRevenue = Math.round(planData.totalRevenue / 7);
+              console.log(`Plan ${plan.planId} average revenue: ${avgRevenue} (total: ${planData.totalRevenue}, divided by 7 days)`);
               return { ...plan, avgRevenue };
             }
+            
+            // If we don't have data for this plan, log a warning
+            console.warn(`No revenue data found for plan: ${plan.planId}`);
             return plan;
           });
           
           setPlans(updatedPlans);
+          
+          // Log summary of the calculation
+          const plansWithRevenue = updatedPlans.filter(plan => plan.avgRevenue !== undefined);
+          console.log(`Set average revenue for ${plansWithRevenue.length} out of ${updatedPlans.length} plans`);
+          
         } catch (error) {
           console.error('Error calculating average revenue:', error);
         } finally {

@@ -99,6 +99,62 @@ export const parseHistoricalData = (data: ArrayBuffer): HistoricalData[] => {
 
   // Extract relevant fields from historical data
   const processedData = jsonData.map((row) => {
+    // Parse date - try multiple potential date field names and formats
+    let dateObj: Date = new Date(); // Default to current date
+    try {
+      const dateValue = row['Date'] || row['KPI_date'] || row['date'] || row['DATE'] || row['Day'] || row['KPI date'];
+      
+      if (dateValue !== undefined && dateValue !== null) {
+        if (typeof dateValue === 'number') {
+          // Excel numeric date (days since 1900)
+          dateObj = XLSX.SSF.parse_date_code(dateValue);
+        } else if (typeof dateValue === 'string') {
+          // Handle format like "Apr 14, 2025"
+          if (/^[A-Za-z]{3}\s\d{1,2},\s\d{4}$/.test(dateValue)) {
+            const parsedDate = new Date(dateValue);
+            if (!isNaN(parsedDate.getTime())) {
+              dateObj = parsedDate;
+            } else {
+              // Fallback for browsers that might not parse this format correctly
+              const parts = dateValue.match(/^([A-Za-z]{3})\s(\d{1,2}),\s(\d{4})$/);
+              if (parts) {
+                const months: {[key: string]: number} = {
+                  'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
+                  'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
+                };
+                const month = months[parts[1]];
+                const day = parseInt(parts[2], 10);
+                const year = parseInt(parts[3], 10);
+                
+                if (month !== undefined && !isNaN(day) && !isNaN(year)) {
+                  dateObj = new Date(year, month, day);
+                }
+              }
+            }
+          } else {
+            // Try to parse other string date formats
+            const parsedDate = new Date(dateValue);
+            if (!isNaN(parsedDate.getTime())) {
+              dateObj = parsedDate;
+            }
+          }
+        } 
+        // If dateValue is potentially a date object, try to use it (after validating)
+        else if (dateValue && typeof dateValue === 'object' && 'getTime' in dateValue) {
+          const time = (dateValue as Date).getTime();
+          if (!isNaN(time)) {
+            dateObj = new Date(time);
+          }
+        }
+      }
+      
+      // Log the parsed date for debugging
+      console.log(`Parsed date: ${dateValue} -> ${dateObj.toISOString()}`);
+    } catch (e) {
+      console.warn('Error parsing date:', e);
+      // Keep the default date (current date)
+    }
+
     // Parse clicks
     let clicks = 0;
     try {
@@ -112,30 +168,62 @@ export const parseHistoricalData = (data: ArrayBuffer): HistoricalData[] => {
     // Parse distribution count
     let distribution_count = 0;
     try {
-      const distribution_countValue = row['Distribution_Count'] || row['distribution_count'] || row['Total_Distribution_Count'] || row['distribution_count'] || row['Distribution Count'] || row['DISTRIBUTION_COUNT'] || row['Distribution_count'] || row['Distribuion_count'] || 0;
+      const distribution_countValue = row['Distribution_Count'] || row['distribution_count'] || row['Total_Distribution_Count'] || row['distribution_count'] || row['Distribution Count'] || row['DISTRIBUTION_COUNT'] || row['Distribution_count'] || row['Distribuion_count'] || row['Distribution'] || 0;
       distribution_count = typeof distribution_countValue === 'string' ? parseFloat(distribution_countValue.replace(/,/g, '')) : parseFloat(String(distribution_countValue)) || 0;
       distribution_count = isNaN(distribution_count) ? 0 : Math.round(distribution_count); // Round distribution to integers
     } catch {
       distribution_count = 0;
     }
     
-    // Parse revenue
+    // Parse revenue - check multiple field names including a "Revenue" field that might have the date in it
     let revenue = 0;
     try {
-      const revenueValue = row['Revenue'] || row['revenue'] || row['Total_Revenue'] || 
-        row['REVENUE'] || row['Total Revenue'] || row['TotalRevenue'] || 0;
+      // First check standard revenue field names
+      let revenueValue = row['Revenue'] || row['revenue'] || row['Total_Revenue'] || 
+        row['REVENUE'] || row['Total Revenue'] || row['TotalRevenue'];
+      
+      // If not found, look for date-specific revenue fields like "Revenue_2023-01-01"
+      if (revenueValue === undefined || revenueValue === null) {
+        // Check for keys that contain "Revenue" and a date pattern
+        const revenueKeys = Object.keys(row).filter(key => 
+          key.toLowerCase().includes('revenue') || 
+          key.toLowerCase().includes('earnings') || 
+          key.toLowerCase().includes('income')
+        );
+        
+        if (revenueKeys.length > 0) {
+          // If multiple revenue fields are found, pick the first one
+          revenueValue = row[revenueKeys[0]];
+          console.log(`Found revenue in field: ${revenueKeys[0]} with value: ${revenueValue}`);
+        }
+      }
+      
       revenue = typeof revenueValue === 'string' ? 
-        parseFloat(revenueValue.replace(/,/g, '')) : parseFloat(String(revenueValue)) || 0;
+        parseFloat(revenueValue.toString().replace(/,/g, '')) : 
+        parseFloat(String(revenueValue)) || 0;
+      
       revenue = isNaN(revenue) ? 0 : Math.round(revenue); // Round revenue to integers
     } catch {
       revenue = 0;
     }
 
+    // Get plan ID, trying various potential field names
+    const planId = String(
+      row['Plan ID'] || row['plan_id'] || row['PlanId'] || row['PLAN_ID'] || 
+      row['planid'] || row['planId'] || row['Plan Id'] || ''
+    );
+
+    // Get publisher, trying various potential field names
+    const publisher = String(
+      row['Publisher'] || row['publisher'] || row['dist_business'] || 
+      row['PUBLISHER'] || row['pub'] || row['Pub'] || ''
+    );
+
     // Create the processed row
     return {
-      planId: String(row['Plan ID'] || row['plan_id'] || row['PlanId'] || row['PLAN_ID'] || ''),
-      publisher: String(row['Publisher'] || row['publisher'] || row['dist_business'] || row['PUBLISHER'] || ''),
-      date: new Date(row['Date'] || row['KPI_date'] || row['date'] || row['DATE'] || new Date()),
+      planId,
+      publisher,
+      date: dateObj,
       revenue,
       distribution_count,
       clicks

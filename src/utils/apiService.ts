@@ -256,17 +256,17 @@ export const apiService = {
 
   getDownloadUrl(): string {
     // Simply use the download rankings endpoint directly
-    return API_ENDPOINTS.downloadRankings;
+    return API_ENDPOINTS.filesRankings;
   },
 
   getPerformanceReportUrl(): string {
     // Simply use the download performance report endpoint directly
-    return API_ENDPOINTS.downloadPerformanceReport;
+    return API_ENDPOINTS.filesPerformance;
   },
 
   async downloadRankingsFile(): Promise<Blob> {
     try {
-      const response = await fetch(API_ENDPOINTS.downloadRankings, {
+      const response = await fetch(API_ENDPOINTS.filesRankings, {
         method: 'GET',
         credentials: 'same-origin',
         headers: {
@@ -287,7 +287,7 @@ export const apiService = {
 
   async downloadPerformanceReport(): Promise<Blob> {
     try {
-      const response = await fetch(API_ENDPOINTS.downloadPerformanceReport, {
+      const response = await fetch(API_ENDPOINTS.filesPerformance, {
         method: 'GET',
         credentials: 'same-origin',
         headers: {
