@@ -16,6 +16,19 @@ import {
 import { apiService } from '@/utils/apiService';
 import { savePlanToFirebase } from '@/utils/firebaseOperations';
 
+// Define type for CSV record
+interface CsvRecord {
+  planId: string;
+  publisher: string;
+  brand_name: string;
+  subcategory: string;
+  tags: string;
+  distributionCount: number;
+  clicksToBeDelivered: number;
+  budgetCap: number;
+  [key: string]: string | number; // Add index signature for flexible property access
+}
+
 interface DataReviewProps {
   inventoryData: Plan[];
   historicalFile: File;
@@ -179,14 +192,15 @@ const DataReview: React.FC<DataReviewProps> = ({ inventoryData, historicalFile, 
       const headers = ['planId', 'publisher', 'budgetCap', 'brand_name', 'subcategory', 'tags', 'distributionCount', 'clicksToBeDelivered'];
       const csvData = plans.map(plan => {
         // Create a base record without budgetCap
-        const csvRecord: Record<string, any> = {
+        const csvRecord: CsvRecord = {
           planId: plan.planId,
           publisher: Array.isArray(plan.publisher) ? plan.publisher.join(';') : plan.publisher,
           brand_name: plan.brand_name,
           subcategory: plan.subcategory,
           tags: plan.tags.join(';'),
           distributionCount: 0,
-          clicksToBeDelivered: 0
+          clicksToBeDelivered: 0,
+          budgetCap: 0
         };
         
         // Add budgetCap only for Paid tag
