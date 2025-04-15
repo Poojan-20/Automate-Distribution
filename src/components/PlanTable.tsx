@@ -34,6 +34,11 @@ const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanUpdate }) => {
 
   // Handler for updating budget cap
   const handleBudgetChange = (index: number, value: string) => {
+    // Only update budget cap if Paid tag is selected
+    if (!plans[index].tags.includes('Paid')) {
+      return;
+    }
+    
     const numericValue = parseFloat(value) || 0;
     const updatedPlan = { ...plans[index], budgetCap: numericValue, isEdited: true };
     onPlanUpdate(updatedPlan);

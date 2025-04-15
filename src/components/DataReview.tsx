@@ -177,21 +177,42 @@ const DataReview: React.FC<DataReviewProps> = ({ inventoryData, historicalFile, 
       // Continue with processing even if some Firebase saves failed
       // Convert plans data to CSV format
       const headers = ['planId', 'publisher', 'budgetCap', 'brand_name', 'subcategory', 'tags', 'distributionCount', 'clicksToBeDelivered'];
-      const csvData = plans.map(plan => ({
-        planId: plan.planId,
-        publisher: Array.isArray(plan.publisher) ? plan.publisher.join(';') : plan.publisher,
-        budgetCap: plan.budgetCap,
-        brand_name: plan.brand_name,
-        subcategory: plan.subcategory,
-        tags: plan.tags.join(';'),
-        distributionCount: plan.distributionCount || 0,
-        clicksToBeDelivered: plan.clicksToBeDelivered || 0
-      }));
+      const csvData = plans.map(plan => {
+        // Create a base record without budgetCap
+        const csvRecord: Record<string, any> = {
+          planId: plan.planId,
+          publisher: Array.isArray(plan.publisher) ? plan.publisher.join(';') : plan.publisher,
+          brand_name: plan.brand_name,
+          subcategory: plan.subcategory,
+          tags: plan.tags.join(';'),
+          distributionCount: 0,
+          clicksToBeDelivered: 0
+        };
+        
+        // Add budgetCap only for Paid tag
+        if (plan.tags.includes('Paid')) {
+          csvRecord.budgetCap = plan.budgetCap || 0;
+        } else {
+          csvRecord.budgetCap = 0; // Set to 0 for non-Paid tags
+        }
+        
+        // Add distributionCount for Mandatory tag
+        if (plan.tags.includes('Mandatory')) {
+          csvRecord.distributionCount = plan.distributionCount || 0;
+        }
+        
+        // Add clicksToBeDelivered for FOC tag
+        if (plan.tags.includes('FOC')) {
+          csvRecord.clicksToBeDelivered = plan.clicksToBeDelivered || 0;
+        }
+        
+        return csvRecord;
+      });
 
       // Convert to CSV string
       const csvString = [
         headers.join(','),
-        ...csvData.map(row => headers.map(header => row[header as keyof typeof row]).join(','))
+        ...csvData.map(row => headers.map(header => row[header]).join(','))
       ].join('\n');
 
       // Create a CSV file

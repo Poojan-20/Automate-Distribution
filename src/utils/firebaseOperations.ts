@@ -10,10 +10,9 @@ interface PlanRecord extends Omit<Plan, 'isEdited'> {
 
 export const savePlanToFirebase = async (plan: Plan) => {
   try {
-    // Only include distributionCount and clicksToBeDelivered if they exist and are valid
+    // Base plan record without budgetCap initially
     const planRecord: PlanRecord = {
       planId: plan.planId,
-      budgetCap: plan.budgetCap,
       tags: plan.tags,
       publisher: plan.publisher,
       subcategory: plan.subcategory,
@@ -21,27 +20,36 @@ export const savePlanToFirebase = async (plan: Plan) => {
       timestamp: Timestamp.now()
     };
 
-    // Add distributionCount only if it exists and tag is Mandatory
-    if (plan.tags.includes('Mandatory') && plan.distributionCount && plan.distributionCount > 0) {
+    // Only include budgetCap if tag is Paid
+    if (plan.tags.includes('Paid') && plan.budgetCap !== undefined) {
+      planRecord.budgetCap = plan.budgetCap;
+    }
+
+    // Add distributionCount if tag is Mandatory (allowing 0 as valid value)
+    if (plan.tags.includes('Mandatory') && plan.distributionCount !== undefined) {
       planRecord.distributionCount = plan.distributionCount;
     }
 
-    // Add clicksToBeDelivered only if it exists and tag is FOC
-    if (plan.tags.includes('FOC') && plan.clicksToBeDelivered && plan.clicksToBeDelivered > 0) {
+    // Add clicksToBeDelivered if tag is FOC (allowing 0 as valid value)
+    if (plan.tags.includes('FOC') && plan.clicksToBeDelivered !== undefined) {
       planRecord.clicksToBeDelivered = plan.clicksToBeDelivered;
     }
 
-    // Validate if the plan should be saved
-    if (!plan.publisher || plan.publisher.length === 0 || (plan.budgetCap !== undefined && plan.budgetCap <= 0)) {
-      throw new Error(`Plan ${plan.planId} is missing required fields`);
+    // Validate if the plan has a publisher (required for all plans)
+    if (!plan.publisher || plan.publisher.length === 0) {
+      throw new Error(`Plan ${plan.planId} is missing publisher`);
     }
 
-    // Additional validation for tag-specific requirements
-    if (plan.tags.includes('Mandatory') && (!planRecord.distributionCount || planRecord.distributionCount <= 0)) {
+    // Validate based on tag type
+    if (plan.tags.includes('Paid') && (planRecord.budgetCap === undefined)) {
+      throw new Error(`Plan ${plan.planId} is missing budget cap for Paid tag`);
+    }
+
+    if (plan.tags.includes('Mandatory') && (planRecord.distributionCount === undefined)) {
       throw new Error(`Plan ${plan.planId} is missing distribution count for Mandatory tag`);
     }
 
-    if (plan.tags.includes('FOC') && (!planRecord.clicksToBeDelivered || planRecord.clicksToBeDelivered <= 0)) {
+    if (plan.tags.includes('FOC') && (planRecord.clicksToBeDelivered === undefined)) {
       throw new Error(`Plan ${plan.planId} is missing clicks to be delivered for FOC tag`);
     }
 
@@ -70,17 +78,31 @@ export const getLatestPlanData = async (planId: string): Promise<Plan | null> =>
     if (!querySnapshot.empty) {
       const doc = querySnapshot.docs[0];
       const data = doc.data();
-      return {
+      
+      // Base plan data
+      const plan: Plan = {
         planId: data.planId,
-        budgetCap: data.budgetCap,
         tags: data.tags || [],
         publisher: data.publisher || [],
-        subcategory: data.subcategory,
+        subcategory: data.subcategory || '',
         brand_name: data.brand_name || '',
-        distributionCount: data.distributionCount || 0,
-        clicksToBeDelivered: data.clicksToBeDelivered || 0,
         isEdited: false
       };
+      
+      // Add fields based on tag type
+      if (data.tags && data.tags.includes('Paid')) {
+        plan.budgetCap = data.budgetCap;
+      }
+      
+      if (data.tags && data.tags.includes('Mandatory')) {
+        plan.distributionCount = data.distributionCount;
+      }
+      
+      if (data.tags && data.tags.includes('FOC')) {
+        plan.clicksToBeDelivered = data.clicksToBeDelivered;
+      }
+      
+      return plan;
     }
     return null;
   } catch (error) {
