@@ -205,7 +205,7 @@ const DataReview: React.FC<DataReviewProps> = ({ inventoryData, historicalFile, 
         
         // Add budgetCap only for Paid tag
         if (plan.tags.includes('Paid')) {
-          csvRecord.budgetCap = plan.budgetCap || 0;
+          csvRecord.budgetCap = plan.budgetCap !== undefined ? plan.budgetCap : 0;
         } else {
           csvRecord.budgetCap = 0; // Set to 0 for non-Paid tags
         }

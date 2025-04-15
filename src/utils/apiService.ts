@@ -101,8 +101,10 @@ export const apiService = {
             // Parse arrays from semicolon-separated values
             row[header] = values[index]?.includes(';') ? values[index].split(';') : [values[index]];
           } else if (header === 'budgetCap' || header === 'distributionCount' || header === 'clicksToBeDelivered') {
-            // Parse numbers
-            row[header] = parseFloat(values[index]) || 0;
+            // Parse numbers - use parseFloat directly and handle NaN explicitly
+            // This ensures 0 is preserved as 0, not converted to a falsy value
+            const parsed = parseFloat(values[index]);
+            row[header] = isNaN(parsed) ? 0 : parsed;
           } else {
             // Keep other fields as strings
             row[header] = values[index] || '';
@@ -113,11 +115,11 @@ export const apiService = {
           plan_id: row.planId,
           publisher: row.publisher, // Keep as array
           tags: row.tags, // Keep as array
-          budget_cap: row.budgetCap || 0,
+          budget_cap: row.budgetCap !== undefined ? row.budgetCap : 0,
           subcategory: row.subcategory || '',
           brand_name: row.brand_name || '',
-          distribution: row.distributionCount || 0, // Renamed to match backend
-          clicks_to_be_delivered: row.clicksToBeDelivered || 0
+          distribution: row.distributionCount !== undefined ? row.distributionCount : 0, // Renamed to match backend
+          clicks_to_be_delivered: row.clicksToBeDelivered !== undefined ? row.clicksToBeDelivered : 0
         };
       });
 

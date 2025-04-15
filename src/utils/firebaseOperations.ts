@@ -21,8 +21,9 @@ export const savePlanToFirebase = async (plan: Plan) => {
     };
 
     // Only include budgetCap if tag is Paid
-    if (plan.tags.includes('Paid') && plan.budgetCap !== undefined) {
-      planRecord.budgetCap = plan.budgetCap;
+    if (plan.tags.includes('Paid')) {
+      // Allow explicit zero values but not undefined
+      planRecord.budgetCap = plan.budgetCap !== undefined ? plan.budgetCap : 0;
     }
 
     // Add distributionCount if tag is Mandatory (allowing 0 as valid value)
@@ -41,7 +42,7 @@ export const savePlanToFirebase = async (plan: Plan) => {
     }
 
     // Validate based on tag type
-    if (plan.tags.includes('Paid') && (planRecord.budgetCap === undefined)) {
+    if (plan.tags.includes('Paid') && planRecord.budgetCap === undefined) {
       throw new Error(`Plan ${plan.planId} is missing budget cap for Paid tag`);
     }
 
@@ -91,7 +92,7 @@ export const getLatestPlanData = async (planId: string): Promise<Plan | null> =>
       
       // Add fields based on tag type
       if (data.tags && data.tags.includes('Paid')) {
-        plan.budgetCap = data.budgetCap;
+        plan.budgetCap = data.budgetCap !== undefined ? data.budgetCap : undefined;
       }
       
       if (data.tags && data.tags.includes('Mandatory')) {

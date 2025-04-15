@@ -39,8 +39,13 @@ const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanUpdate }) => {
       return;
     }
     
-    const numericValue = parseFloat(value) || 0;
-    const updatedPlan = { ...plans[index], budgetCap: numericValue, isEdited: true };
+    // Use parseFloat but handle empty string as 0
+    // This is important for allowing users to clear the field and set to 0
+    const numericValue = value === '' ? 0 : parseFloat(value);
+    // Don't use || 0 as it will convert NaN to 0, which is not what we want
+    const budgetCap = isNaN(numericValue) ? 0 : numericValue;
+    
+    const updatedPlan = { ...plans[index], budgetCap, isEdited: true };
     onPlanUpdate(updatedPlan);
   };
 
@@ -77,7 +82,7 @@ const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanUpdate }) => {
       return;
     }
 
-    // Create updatedPlan with the new tag
+    // Otherwise set only the selected tag
     const updatedPlan = {
       ...plans[index],
       tags: [tag],
@@ -101,10 +106,8 @@ const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanUpdate }) => {
         updatedPlan.distributionCount = 0;
       }
     } else if (tag === 'Paid') {
-      // Ensure budget cap is initialized
-      if (updatedPlan.budgetCap === undefined) {
-        updatedPlan.budgetCap = 0;
-      }
+      // Always ensure budget cap has a value when Paid tag is selected
+      updatedPlan.budgetCap = updatedPlan.budgetCap !== undefined ? updatedPlan.budgetCap : 0;
     }
     
     onPlanUpdate(updatedPlan);
