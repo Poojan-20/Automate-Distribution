@@ -1,6 +1,8 @@
+"use client"
+
 import React, { useState, useEffect } from 'react';
 import { Tab } from '@headlessui/react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { apiService, ProcessDataResponse } from '@/utils/apiService';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -9,11 +11,20 @@ import {
   Download, 
   FileSpreadsheet, 
   BarChart3,
+  LineChart as LineChartIcon,
   RefreshCcw,
   Loader2,
-  FileBarChart2
+  FileBarChart2,
+  TrendingUp
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import { Line, LineChart, CartesianGrid, XAxis, YAxis, Dot } from "recharts";
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart"
 
 interface ResultsViewProps {
   resultFile: string;
@@ -21,11 +32,20 @@ interface ResultsViewProps {
   onStartOver: () => void;
 }
 
+interface MetricsChartData {
+  planId: string;
+  epc: number;
+  ctr: number;
+  publisher: string;
+}
+
 const ResultsView: React.FC<ResultsViewProps> = ({ resultFile, performanceReport, onStartOver }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [rankingData, setRankingData] = useState<ProcessDataResponse | null>(null);
   const [publishers, setPublishers] = useState<string[]>([]);
+  const [chartData, setChartData] = useState<MetricsChartData[]>([]);
+  const [publisherMetrics, setPublisherMetrics] = useState<{[key: string]: {epc: number, ctr: number}}>({});
 
   useEffect(() => {
     const fetchRankingData = async () => {
@@ -48,6 +68,45 @@ const ResultsView: React.FC<ResultsViewProps> = ({ resultFile, performanceReport
         if (data.by_publisher) {
           setPublishers(Object.keys(data.by_publisher));
         }
+
+        // Prepare data for the line chart - plan specific data
+        if (data.all_publishers && data.all_publishers.length > 0) {
+          const chartMetrics: MetricsChartData[] = data.all_publishers.map(item => ({
+            planId: item.plan_id,
+            epc: parseFloat(String(item.EPC)) || 0,
+            ctr: parseFloat(String(item.CTR)) || 0,
+            publisher: item.publisher
+          }));
+          
+          // Sort by EPC value in descending order
+          chartMetrics.sort((a, b) => b.epc - a.epc);
+          
+          // Only take top 10 plans for better visualization
+          setChartData(chartMetrics.slice(0, 10));
+          
+          // Calculate publisher-wise averages
+          const pubMetrics: {[key: string]: {epc: number, ctr: number, count: number}} = {};
+          
+          chartMetrics.forEach(item => {
+            if (!pubMetrics[item.publisher]) {
+              pubMetrics[item.publisher] = { epc: 0, ctr: 0, count: 0 };
+            }
+            pubMetrics[item.publisher].epc += item.epc;
+            pubMetrics[item.publisher].ctr += item.ctr;
+            pubMetrics[item.publisher].count += 1;
+          });
+          
+          // Calculate averages
+          const aggregatedMetrics: {[key: string]: {epc: number, ctr: number}} = {};
+          Object.entries(pubMetrics).forEach(([pub, data]) => {
+            aggregatedMetrics[pub] = {
+              epc: data.count > 0 ? data.epc / data.count : 0,
+              ctr: data.count > 0 ? data.ctr / data.count : 0
+            };
+          });
+          
+          setPublisherMetrics(aggregatedMetrics);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load ranking data');
         console.error('Error loading ranking data:', err);
@@ -58,6 +117,9 @@ const ResultsView: React.FC<ResultsViewProps> = ({ resultFile, performanceReport
 
     fetchRankingData();
   }, [resultFile]);
+
+  
+    
 
   const downloadRankingsFile = async () => {
     try {
@@ -133,6 +195,227 @@ const ResultsView: React.FC<ResultsViewProps> = ({ resultFile, performanceReport
     return (
       <div className={badgeClass}>
         {rank}
+      </div>
+    );
+  };
+
+  // Define chart colors for publishers
+  const publisherColors = {
+    Jiocinema: "hsl(var(--chart-1))", // Use hsl values from your CSS variables
+    Jioengage: "hsl(var(--chart-2))",
+    MyJio: "hsl(var(--chart-3))",
+    JioCoupons: "hsl(var(--chart-4))",
+    Default1: "hsl(var(--chart-5))",
+  };
+
+  // Create chart config for EPC and CTR
+  const epcChartConfig: ChartConfig = {
+    epc: {
+      label: "EPC",
+      color: "hsl(var(--chart-1))",
+    }
+  };
+  
+  const ctrChartConfig: ChartConfig = {
+    ctr: {
+      label: "CTR",
+      color: "hsl(var(--chart-2))",
+    }
+  };
+  
+  // Add publisher-specific configs
+  publishers.forEach((publisher, index) => {
+    epcChartConfig[publisher] = {
+      label: publisher,
+      color: publisherColors[publisher as keyof typeof publisherColors] || 
+             `hsl(var(--chart-${(index % 5) + 1}))`
+    };
+    
+    ctrChartConfig[publisher] = {
+      label: publisher,
+      color: publisherColors[publisher as keyof typeof publisherColors] || 
+             `hsl(var(--chart-${(index % 5) + 1}))`
+    };
+  });
+
+  // Create data for publisher charts
+  const getPublisherChartData = () => {
+    console.log(chartData)
+    return publishers.map(pub => ({
+      publisher: pub,
+      epc: publisherMetrics[pub]?.epc || 0,
+      ctr: publisherMetrics[pub]?.ctr || 0,
+      fill: publisherColors[pub as keyof typeof publisherColors] || 
+            `hsl(var(--chart-${(publishers.indexOf(pub) % 5) + 1}))`
+    }));
+  };
+
+  // Render both EPC and CTR charts in separate cards
+  const renderPublisherCharts = () => {
+    if (publishers.length === 0) return null;
+    
+    const publisherData = getPublisherChartData();
+    
+    return (
+      <div className="flex gap-6 mt-8">
+        {/* EPC Chart Card */}
+        <Card className="bg-white rounded-xl shadow-lg w-full min-h-[300px] border border-gray-100 overflow-hidden">
+          <CardHeader className="border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-5">
+            <CardTitle className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+              <LineChartIcon className="h-5 w-5 text-blue-600" strokeWidth={2} />
+              Publisher EPC Performance
+            </CardTitle>
+            <CardDescription className="text-gray-600 mt-1">
+              Average Earnings Per Click by Publisher
+            </CardDescription>
+          </CardHeader>
+          
+          <CardContent className="p-6">
+            <div className="h-[300px] w-full">
+              <ChartContainer config={epcChartConfig}>
+                <LineChart
+                  accessibilityLayer
+                  data={publisherData}
+                  margin={{ top: 24, right: 24, left: 24, bottom: 24 }}
+                >
+                  <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis 
+                    dataKey="publisher"
+                    tick={{ fontSize: 12, fill: '#666' }}
+                  />
+                  <YAxis 
+                    tickFormatter={(value) => value.toFixed(2)}
+                    tick={{ fontSize: 12, fill: '#666' }}
+                  />
+                  <ChartTooltip
+                    cursor={false}
+                    content={
+                      <ChartTooltipContent
+                        indicator="line"
+                        labelFormatter={(label) => `Publisher: ${label}`}
+                      />
+                    }
+                  />
+                  <Line
+                    dataKey="epc"
+                    type="monotone"
+                    stroke="var(--color-epc)"
+                    strokeWidth={2}
+                    dot={({ payload, ...props }) => {
+                      return (
+                        <Dot
+                          key={payload.publisher}
+                          r={5}
+                          cx={props.cx}
+                          cy={props.cy}
+                          fill={payload.fill}
+                          stroke={payload.fill}
+                        />
+                      )
+                    }}
+                  />
+                </LineChart>
+              </ChartContainer>
+            </div>
+          </CardContent>
+          
+          <CardFooter className="flex-col items-start gap-2 text-sm bg-gray-50 p-4 border-t border-gray-100">
+            <div className="flex gap-2 font-medium leading-none mt-4">
+              {Math.max(...Object.values(publisherMetrics).map(m => m.epc)) > 0 ? (
+                <span className="flex items-center text-emerald-600">
+                  Best performing: {Object.entries(publisherMetrics)
+                    .sort((a, b) => b[1].epc - a[1].epc)[0][0]} 
+                  <TrendingUp className="h-4 w-4 ml-1" />
+                </span>
+              ) : (
+                <span>No EPC data available</span>
+              )}
+            </div>
+            <div className="leading-none text-muted-foreground">
+              Higher EPC indicates better monetization efficiency
+            </div>
+          </CardFooter>
+        </Card>
+        
+        {/* CTR Chart Card */}
+        <Card className="bg-white rounded-xl shadow-lg w-full min-h-[300px] border border-gray-100 overflow-hidden">
+          <CardHeader className="border-b border-gray-100 bg-gradient-to-r from-purple-50 to-pink-50 px-6 py-5">
+            <CardTitle className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+              <LineChartIcon className="h-5 w-5 text-purple-600" strokeWidth={2} />
+              Publisher CTR Performance
+            </CardTitle>
+            <CardDescription className="text-gray-600 mt-1">
+              Average Click-Through Rate by Publisher
+            </CardDescription>
+          </CardHeader>
+          
+          <CardContent className="p-6">
+            <div className="h-[300px] w-full">
+              <ChartContainer config={ctrChartConfig}>
+                <LineChart
+                  accessibilityLayer
+                  data={publisherData}
+                  margin={{ top: 24, right: 24, left: 24, bottom: 24 }}
+                >
+                  <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis 
+                    dataKey="publisher"
+                    tick={{ fontSize: 12, fill: '#666' }}
+                  />
+                  <YAxis 
+                    tickFormatter={(value) => `${value.toFixed(2)}%`}
+                    tick={{ fontSize: 12, fill: '#666' }}
+                  />
+                  <ChartTooltip
+                    cursor={false}
+                    content={
+                      <ChartTooltipContent
+                        indicator="line"
+                        labelFormatter={(label) => `Publisher: ${label}%`}
+                        // formatter={(value) => [`${parseFloat(value as string).toFixed(2)}%`, "CTR"]}
+                      />
+                    }
+                  />
+                  <Line
+                    dataKey="ctr"
+                    type="monotone"
+                    stroke="var(--color-ctr)"
+                    strokeWidth={2}
+                    dot={({ payload, ...props }) => {
+                      return (
+                        <Dot
+                          key={payload.publisher}
+                          r={5}
+                          cx={props.cx}
+                          cy={props.cy}
+                          fill={payload.fill}
+                          stroke={payload.fill}
+                        />
+                      )
+                    }}
+                  />
+                </LineChart>
+              </ChartContainer>
+            </div>
+          </CardContent>
+          
+          <CardFooter className="flex-col items-start gap-2 text-sm bg-gray-50 p-4 border-t border-gray-100">
+            <div className="flex gap-2 font-medium leading-none mt-4">
+              {Math.max(...Object.values(publisherMetrics).map(m => m.ctr)) > 0 ? (
+                <span className="flex items-center text-purple-600">
+                  Best performing: {Object.entries(publisherMetrics)
+                    .sort((a, b) => b[1].ctr - a[1].ctr)[0][0]} 
+                  <TrendingUp className="h-4 w-4 ml-1" />
+                </span>
+              ) : (
+                <span>No CTR data available</span>
+              )}
+            </div>
+            <div className="leading-none text-muted-foreground">
+              Higher CTR indicates better user engagement
+            </div>
+          </CardFooter>
+        </Card>
       </div>
     );
   };
@@ -253,6 +536,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ resultFile, performanceReport
   };
 
   return (
+    <>
     <Card className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
       <CardHeader className="border-b border-gray-100 bg-gradient-to-r from-indigo-50 to-purple-50 px-6 py-5">
         <div className="flex justify-between items-center">
@@ -472,6 +756,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ resultFile, performanceReport
           </Tab.Group>
         </div>
         
+
         <div className="flex justify-center p-6 bg-gray-50 border-t border-gray-100">
           <Button 
             className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white px-6 py-5 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 font-medium text-base"
@@ -483,6 +768,8 @@ const ResultsView: React.FC<ResultsViewProps> = ({ resultFile, performanceReport
         </div>
       </CardContent>
     </Card>
+    {!loading && !error && rankingData && renderPublisherCharts()}
+    </>
   );
 };
 
