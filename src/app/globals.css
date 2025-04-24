@@ -2,28 +2,48 @@
 
 :root {
   /* Modern color palette - 2024 refresh */
-  --primary: oklch(0.21 0.034 264.665); /* Purple 800 */
-  --primary-light: #8b5cf6; /* Violet 500 */
-  --primary-dark: #4c1d95; /* Purple 900 */
+  --primary: oklch(0.21 0.034 264.665);
+  /* Purple 800 */
+  --primary-light: #8b5cf6;
+  /* Violet 500 */
+  --primary-dark: #4c1d95;
+  /* Purple 900 */
 
-  --secondary: oklch(0.967 0.003 264.542); /* Cyan 600 */
-  --secondary-light: #22d3ee; /* Cyan 400 */
-  --secondary-dark: #0e7490; /* Cyan 700 */
+  --secondary: oklch(0.967 0.003 264.542);
+  /* Cyan 600 */
+  --secondary-light: #22d3ee;
+  /* Cyan 400 */
+  --secondary-dark: #0e7490;
+  /* Cyan 700 */
 
-  --accent: oklch(0.967 0.003 264.542); /* Amber 500 */
-  --accent-light: #fbbf24; /* Amber 400 */
-  --accent-dark: #d97706; /* Amber 600 */
+  --accent: oklch(0.967 0.003 264.542);
+  /* Amber 500 */
+  --accent-light: #fbbf24;
+  /* Amber 400 */
+  --accent-dark: #d97706;
+  /* Amber 600 */
 
-  --success: #059669; /* Emerald 600 */
-  --warning: #d97706; /* Amber 600 */
-  --error: #dc2626; /* Red 600 */ /* Gray 50 */ /* Gray 900 */
+  --success: #059669;
+  /* Emerald 600 */
+  --warning: #d97706;
+  /* Amber 600 */
+  --error: #dc2626;
+  /* Red 600 */
+  /* Gray 50 */
+  /* Gray 900 */
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.13 0.028 261.692); /* Gray 900 */
-  --muted: oklch(0.967 0.003 264.542); /* Gray 100 */
-  --muted-foreground: oklch(0.551 0.027 264.364); /* Gray 500 */
-  --border: oklch(0.928 0.006 264.531); /* Gray 200 */
-  --input: oklch(0.928 0.006 264.531); /* Gray 200 */
-  --ring: oklch(0.707 0.022 261.325); /* Violet 500 */
+  --card-foreground: oklch(0.13 0.028 261.692);
+  /* Gray 900 */
+  --muted: oklch(0.967 0.003 264.542);
+  /* Gray 100 */
+  --muted-foreground: oklch(0.551 0.027 264.364);
+  /* Gray 500 */
+  --border: oklch(0.928 0.006 264.531);
+  /* Gray 200 */
+  --input: oklch(0.928 0.006 264.531);
+  /* Gray 200 */
+  --ring: oklch(0.707 0.022 261.325);
+  /* Violet 500 */
 
   /* Typography */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -46,11 +66,11 @@
   --secondary-foreground: oklch(0.21 0.034 264.665);
   --accent-foreground: oklch(0.21 0.034 264.665);
   --destructive: oklch(0.577 0.245 27.325);
-  --chart-1: 243 55% 70%; /* Indigo */
-  --chart-2: 330 84% 60%; /* Pink */
-  --chart-3: 168 84% 40%; /* Teal */
-  --chart-4: 262 83% 58%; /* Violet */
-  --chart-5: 30 95% 60%;  /* Orange */
+  --chart-1: 12 76% 61%;
+  --chart-2: 173 58% 39%;
+  --chart-3: 197 37% 24%;
+  --chart-4: 43 74% 66%;
+  --chart-5: 27 87% 67%;
   --sidebar: oklch(0.985 0.002 247.839);
   --sidebar-foreground: oklch(0.13 0.028 261.692);
   --sidebar-primary: oklch(0.21 0.034 264.665);
@@ -101,13 +121,21 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root { /* Slate 900 */ /* Slate 50 */
-    --card: #1e293b; /* Slate 800 */
-    --card-foreground: #f1f5f9; /* Slate 100 */
-    --muted: #334155; /* Slate 700 */
-    --muted-foreground: #94a3b8; /* Slate 400 */
-    --border: #475569; /* Slate 600 */
-    --input: #475569; /* Slate 600 */
+  :root {
+    /* Slate 900 */
+    /* Slate 50 */
+    --card: #1e293b;
+    /* Slate 800 */
+    --card-foreground: #f1f5f9;
+    /* Slate 100 */
+    --muted: #334155;
+    /* Slate 700 */
+    --muted-foreground: #94a3b8;
+    /* Slate 400 */
+    --border: #475569;
+    /* Slate 600 */
+    --input: #475569;
+    /* Slate 600 */
   }
 }
 
@@ -163,34 +191,39 @@ body {
 
 .rank-1 {
   background-color: rgba(5, 150, 105, 0.15);
-  color: #059669; /* Emerald 600 */
+  color: #059669;
+  /* Emerald 600 */
   border: 2px solid rgba(5, 150, 105, 0.3);
   box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.05);
 }
 
 .rank-2 {
   background-color: rgba(245, 158, 11, 0.15);
-  color: #d97706; /* Amber 600 */
+  color: #d97706;
+  /* Amber 600 */
   border: 2px solid rgba(245, 158, 11, 0.3);
   box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.05);
 }
 
 .rank-3 {
   background-color: rgba(245, 158, 11, 0.15);
-  color: #d97706; /* Amber 600 */
+  color: #d97706;
+  /* Amber 600 */
   border: 2px solid rgba(245, 158, 11, 0.3);
   box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.05);
 }
 
 .rank-top-10 {
   background-color: rgba(239, 68, 68, 0.15);
-  color: #dc2626; /* Red 600 */
+  color: #dc2626;
+  /* Red 600 */
   border: 2px solid rgba(239, 68, 68, 0.3);
 }
 
 .rank-regular {
   background-color: rgba(239, 68, 68, 0.1);
-  color: #b91c1c; /* Red 700 */
+  color: #b91c1c;
+  /* Red 700 */
   border: 2px solid rgba(239, 68, 68, 0.15);
 }
 
@@ -453,11 +486,11 @@ body {
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.551 0.027 264.364);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
+  --chart-1: 220 70% 50%;
+  --chart-2: 160 60% 45%;
+  --chart-3: 30 80% 55%;
+  --chart-4: 280 65% 60%;
+  --chart-5: 340 75% 55%;
   --sidebar: oklch(0.21 0.034 264.665);
   --sidebar-foreground: oklch(0.985 0.002 247.839);
   --sidebar-primary: oklch(0.488 0.243 264.376);
@@ -472,6 +505,7 @@ body {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -479,7 +513,7 @@ body {
 
 /* Line chart styles */
 .metrics-chart-container {
-  --chart-indigo: #6366f1;
+  --chart-indigo: #ff3300;
   --chart-pink: #ec4899;
   --chart-teal: #14b8a6;
   --chart-violet: #8b5cf6;
@@ -559,12 +593,28 @@ body {
   color: #333 !important;
 }
 
+/* Custom style for pie chart text */
+.performance-pie-chart .recharts-text,
+.performance-pie-chart .recharts-label,
+.performance-pie-chart .recharts-label-list,
+.performance-pie-chart .recharts-legend-wrapper text {
+  fill: #000 !important;
+  color: #000 !important;
+}
+
+.performance-pie-chart .recharts-legend-item-text,
+.performance-pie-chart .recharts-tooltip,
+.performance-pie-chart .recharts-default-tooltip {
+  color: #000 !important;
+  fill: #000 !important;
+}
+
 /* Make charts responsive */
 @media (max-width: 768px) {
   .recharts-wrapper {
     font-size: 12px;
   }
-  
+
   .recharts-cartesian-axis-tick-value {
     font-size: 10px;
   }

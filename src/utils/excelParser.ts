@@ -133,9 +133,9 @@ export const parseHistoricalData = (data: ArrayBuffer): HistoricalData[] => {
             }
           } else {
             // Try to parse other string date formats
-            const parsedDate = new Date(dateValue);
-            if (!isNaN(parsedDate.getTime())) {
-              dateObj = parsedDate;
+          const parsedDate = new Date(dateValue);
+          if (!isNaN(parsedDate.getTime())) {
+            dateObj = parsedDate;
             }
           }
         } 

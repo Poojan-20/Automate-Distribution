@@ -398,6 +398,46 @@ def get_rankings():
 
     return jsonify(latest_rankings)
 
+@app.route('/api/get-performance-data', methods=['GET'])
+def get_performance_data():
+    """Return the performance report data"""
+    try:
+        # Check if the performance report exists
+        if not os.path.exists(PERFORMANCE_FILE):
+            return jsonify({"error": "No performance report available"}), 404
+            
+        # Read the Excel file into a dataframe
+        df = pd.read_excel(PERFORMANCE_FILE)
+        
+        # Convert to the format needed by the frontend
+        performance_data = []
+        for _, row in df.iterrows():
+            # Ensure all required fields exist
+            publisher = row.get('publisher', '')
+            plan_id = row.get('plan_id', '')
+            
+            # Skip invalid rows
+            if not publisher or not plan_id:
+                continue
+                
+            # Create record with required metrics
+            record = {
+                'publisher': publisher,
+                'plan_id': plan_id,
+                'CTR': float(row.get('CTR', 0)),
+                'avg_revenue': float(row.get('avg_revenue', 0)),
+                'clicks': int(row.get('clicks', 0)) if pd.notnull(row.get('clicks', 0)) else 0,
+                'distribution': int(row.get('distribution', 0)) if pd.notnull(row.get('distribution', 0)) else 0
+            }
+            
+            performance_data.append(record)
+            
+        logger.info(f"Serving performance data with {len(performance_data)} records")
+        return jsonify(performance_data)
+    except Exception as e:
+        logger.exception(f"Error getting performance data: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/api/health', methods=['GET'])
 def health_check():
     """Simple health check endpoint for debugging"""
@@ -469,6 +509,11 @@ class handler(BaseHTTPRequestHandler):
         # Get rankings endpoint
         if self.path == '/api/get-rankings':
             self._handle_get_rankings()
+            return
+            
+        # Get performance data endpoint
+        if self.path == '/api/get-performance-data':
+            self._handle_get_performance_data()
             return
             
         # Process data endpoint
@@ -574,6 +619,47 @@ class handler(BaseHTTPRequestHandler):
             
         except Exception as e:
             logger.exception(f"Error getting rankings: {str(e)}")
+            self._send_json_response({"error": str(e)}, status=500)
+    
+    def _handle_get_performance_data(self):
+        """Handle GET /api/get-performance-data endpoint"""
+        try:
+            # Check if the performance report exists
+            if not os.path.exists(PERFORMANCE_FILE):
+                self._send_json_response({"error": "No performance report available"}, status=404)
+                return
+                
+            # Read the Excel file into a dataframe
+            df = pd.read_excel(PERFORMANCE_FILE)
+            
+            # Convert to the format needed by the frontend
+            performance_data = []
+            for _, row in df.iterrows():
+                # Ensure all required fields exist
+                publisher = row.get('publisher', '')
+                plan_id = row.get('plan_id', '')
+                
+                # Skip invalid rows
+                if not publisher or not plan_id:
+                    continue
+                    
+                # Create record with required metrics
+                record = {
+                    'publisher': publisher,
+                    'plan_id': plan_id,
+                    'CTR': float(row.get('CTR', 0)),
+                    'avg_revenue': float(row.get('avg_revenue', 0)),
+                    'clicks': int(row.get('clicks', 0)) if pd.notnull(row.get('clicks', 0)) else 0,
+                    'distribution': int(row.get('distribution', 0)) if pd.notnull(row.get('distribution', 0)) else 0
+                }
+                
+                performance_data.append(record)
+                
+            logger.info(f"Serving performance data with {len(performance_data)} records")
+            self._send_json_response(performance_data)
+            
+        except Exception as e:
+            logger.exception(f"Error getting performance data: {str(e)}")
             self._send_json_response({"error": str(e)}, status=500)
     
     def _handle_process_data(self):

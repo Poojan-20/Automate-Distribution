@@ -228,7 +228,10 @@ function ChartTooltipContent({
                   >
                     <div className="grid gap-1.5">
                       {nestLabel ? tooltipLabel : null}
-                      <span className="text-muted-foreground">
+                      <span 
+                        className="font-medium"
+                        style={{ color: indicatorColor }}
+                      >
                         {itemConfig?.label || item.name}
                       </span>
                     </div>
@@ -270,7 +273,7 @@ function ChartLegendContent({
   return (
     <div
       className={cn(
-        "flex items-center justify-center gap-4",
+        "text-gray-800 flex items-center justify-center gap-4",
         verticalAlign === "top" ? "pb-3" : "pt-3",
         className
       )}
@@ -283,7 +286,8 @@ function ChartLegendContent({
           <div
             key={item.value}
             className={cn(
-              "[&>svg]:text-muted-foreground flex items-center gap-1.5 [&>svg]:h-3 [&>svg]:w-3"
+              "[&>svg]:text-muted-foreground flex items-center gap-1.5 [&>svg]:h-3 [&>svg]:w-3",
+              className
             )}
           >
             {itemConfig?.icon && !hideIcon ? (
@@ -296,7 +300,7 @@ function ChartLegendContent({
                 }}
               />
             )}
-            {itemConfig?.label}
+            <span className={cn("text-sm", className)}>{itemConfig?.label}</span>
           </div>
         )
       })}

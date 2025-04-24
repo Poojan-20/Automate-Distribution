@@ -254,6 +254,51 @@ export const apiService = {
     }
   },
 
+  async getPerformanceData(): Promise<Array<{
+    publisher: string;
+    plan_id: string;
+    CTR: number;
+    avg_revenue: number;
+    clicks: number;
+    distribution: number;
+  }>> {
+    try {
+      console.log('Getting performance report data from backend');
+      const response = await fetch(`${API_BASE_URL}/get-performance-data`, {
+        credentials: 'same-origin'
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to get performance data: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      // Ensure all required fields exist with default values
+      const processedData = data.map((item: {
+        publisher?: string;
+        plan_id?: string;
+        CTR?: number | string;
+        avg_revenue?: number | string;
+        clicks?: number | string;
+        distribution?: number | string;
+      }) => ({
+        publisher: item.publisher || '',
+        plan_id: item.plan_id || '',
+        CTR: parseFloat(String(item.CTR)) || 0,
+        avg_revenue: parseFloat(String(item.avg_revenue)) || 0,
+        clicks: parseInt(String(item.clicks)) || 0,
+        distribution: parseInt(String(item.distribution)) || 0
+      }));
+      
+      console.log('Processed performance data:', processedData);
+      return processedData;
+    } catch (error) {
+      console.error('Error getting performance data:', error);
+      throw error;
+    }
+  },
+
   getDownloadUrl(): string {
     // Simply use the download rankings endpoint directly
     return API_ENDPOINTS.filesRankings;
