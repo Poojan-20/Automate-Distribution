@@ -11,6 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { X, Search, Check, ListFilter, Tag, BarChart, IndianRupee } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 
 interface PlanTableProps {
   plans: Plan[];
@@ -19,6 +20,7 @@ interface PlanTableProps {
 
 const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanUpdate }) => {
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const { toast } = useToast();
 
   if (!plans || plans.length === 0) {
     return (
@@ -36,6 +38,11 @@ const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanUpdate }) => {
   const handleBudgetChange = (index: number, value: string) => {
     // Only update budget cap if Paid tag is selected
     if (!plans[index].tags.includes('Paid')) {
+      toast({
+        variant: "warning",
+        title: "Budget Update Not Allowed",
+        description: "Budget cap can only be set for plans with the 'Paid' tag.",
+      });
       return;
     }
     
@@ -47,6 +54,8 @@ const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanUpdate }) => {
     
     const updatedPlan = { ...plans[index], budgetCap, isEdited: true };
     onPlanUpdate(updatedPlan);
+
+    // We don't need a success toast for budget updates
   };
 
   const filteredPlans = plans.filter(plan => {
@@ -79,6 +88,11 @@ const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanUpdate }) => {
   const handleTagSelect = (index: number, tag: typeof PREDEFINED_TAGS[number]) => {
     // If tag is already selected, do nothing (keep it selected)
     if (plans[index].tags.includes(tag) && plans[index].tags.length === 1) {
+      toast({
+        variant: "warning",
+        title: "Tag Selection",
+        description: "At least one tag must be selected.",
+      });
       return;
     }
 
@@ -92,6 +106,10 @@ const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanUpdate }) => {
     // Reset budget cap if switching to FOC or Mandatory
     if ((tag === 'FOC' || tag === 'Mandatory') && plans[index].tags.includes('Paid')) {
       updatedPlan.budgetCap = undefined;
+      toast({
+        title: "Budget Cap Reset",
+        description: `Budget cap has been reset as the plan was changed to ${tag} type.`,
+      });
     }
     
     // Update input fields based on tag
@@ -100,14 +118,17 @@ const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanUpdate }) => {
       if (updatedPlan.clicksToBeDelivered === undefined) {
         updatedPlan.clicksToBeDelivered = 0;
       }
+      // No need for toast here
     } else if (tag === 'Mandatory') {
       // Ensure distribution count is initialized
       if (updatedPlan.distributionCount === undefined) {
         updatedPlan.distributionCount = 0;
       }
+      // No need for toast here
     } else if (tag === 'Paid') {
       // Always ensure budget cap has a value when Paid tag is selected
       updatedPlan.budgetCap = updatedPlan.budgetCap !== undefined ? updatedPlan.budgetCap : 0;
+      // No need for toast here
     }
     
     onPlanUpdate(updatedPlan);
@@ -142,6 +163,7 @@ const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanUpdate }) => {
       isEdited: true
     };
     onPlanUpdate(updatedPlan);
+    // Remove toast notification for select all
   };
 
   const handleClearAllPublishers = (index: number) => {
@@ -151,6 +173,7 @@ const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanUpdate }) => {
       isEdited: true
     };
     onPlanUpdate(updatedPlan);
+    // Remove toast notification for clear all
   };
 
   return (

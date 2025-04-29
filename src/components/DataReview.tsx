@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { apiService } from '@/utils/apiService';
 import { savePlanToFirebase } from '@/utils/firebaseOperations';
+import { useToast } from '@/components/ui/use-toast';
 
 // Define type for CSV record
 interface CsvRecord {
@@ -43,6 +44,7 @@ const DataReview: React.FC<DataReviewProps> = ({ inventoryData, historicalFile, 
   const [warning, setWarning] = useState<string | null>(null);
   const [firebaseSaveStatus, setFirebaseSaveStatus] = useState<{success: number; failed: number}>({ success: 0, failed: 0 });
   const [loadingStats, setLoadingStats] = useState<boolean>(true);
+  const { toast } = useToast();
 
   // Initialize with the inventory data
   useEffect(() => {
@@ -138,6 +140,12 @@ const DataReview: React.FC<DataReviewProps> = ({ inventoryData, historicalFile, 
           
         } catch (error) {
           console.error('Error calculating average revenue:', error);
+          // Keep this toast - it's a validation error that needs user attention
+          toast({
+            variant: "destructive",
+            title: "Calculation Error",
+            description: "Failed to calculate average revenue from historical data.",
+          });
         } finally {
           setLoadingStats(false);
         }
@@ -145,7 +153,7 @@ const DataReview: React.FC<DataReviewProps> = ({ inventoryData, historicalFile, 
       
       calculateAverageRevenue();
     }
-  }, [inventoryData, historicalFile]);
+  }, [inventoryData, historicalFile, toast]);
 
   // Update a specific plan
   const handlePlanUpdate = (updatedPlan: Plan) => {
@@ -196,6 +204,12 @@ const DataReview: React.FC<DataReviewProps> = ({ inventoryData, historicalFile, 
 
     if (!isValid) {
       setWarning(`${unfilledCount} plan(s) have missing values. Please check publisher and required fields for each tag type.`);
+      // Keep this toast - it's a validation error that needs user attention
+      toast({
+        variant: "warning",
+        title: "Validation Warning",
+        description: `${unfilledCount} plan(s) have missing values. Please check publisher and required fields for each tag type.`,
+      });
     } else {
       setWarning(null);
     }
@@ -224,6 +238,11 @@ const DataReview: React.FC<DataReviewProps> = ({ inventoryData, historicalFile, 
   const handleProcessData = async () => {
     if (!plans || plans.length === 0) {
       setError('No inventory data to process');
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "No inventory data to process",
+      });
       return;
     }
 
@@ -306,7 +325,13 @@ const DataReview: React.FC<DataReviewProps> = ({ inventoryData, historicalFile, 
       setSuccess(successMessage);
       onSubmit(resultFile, performanceReport);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to process plans');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to process plans';
+      setError(errorMessage);
+      toast({
+        variant: "destructive",
+        title: "Processing Error",
+        description: errorMessage,
+      });
     } finally {
       setIsSubmitting(false);
     }

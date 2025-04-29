@@ -34,6 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { useToast } from "@/components/ui/use-toast";
 
 interface ResultsViewProps {
   resultFile: string;
@@ -67,6 +68,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ resultFile, performanceReport
   const [performanceData, setPerformanceData] = useState<PerformanceData[]>([]);
   const [loadingPerformance, setLoadingPerformance] = useState(false);
   const [performanceError, setPerformanceError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchRankingData = async () => {
@@ -127,10 +129,24 @@ const ResultsView: React.FC<ResultsViewProps> = ({ resultFile, performanceReport
           });
           
           setPublisherMetrics(aggregatedMetrics);
+          
+          // Show success toast
+          toast({
+            variant: "success",
+            title: "Rankings Loaded",
+            description: `Successfully loaded rankings for ${data.all_publishers.length} plans.`,
+          });
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load ranking data');
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load ranking data';
+        setError(errorMessage);
         console.error('Error loading ranking data:', err);
+        
+        toast({
+          variant: "destructive",
+          title: "Error Loading Rankings",
+          description: errorMessage,
+        });
       } finally {
         setLoading(false);
       }
@@ -150,12 +166,29 @@ const ResultsView: React.FC<ResultsViewProps> = ({ resultFile, performanceReport
         
         if (data && data.length > 0) {
           setPerformanceData(data);
+          toast({
+            variant: "success",
+            title: "Performance Data Loaded",
+            description: `Successfully loaded performance data for ${data.length} records.`,
+          });
         } else {
           setPerformanceError("No performance data available");
+          toast({
+            variant: "warning",
+            title: "No Performance Data",
+            description: "No performance data is available for analysis.",
+          });
         }
       } catch (err) {
-        setPerformanceError(err instanceof Error ? err.message : 'Failed to load performance data');
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load performance data';
+        setPerformanceError(errorMessage);
         console.error('Error loading performance data:', err);
+        
+        toast({
+          variant: "destructive",
+          title: "Error Loading Performance",
+          description: errorMessage,
+        });
       } finally {
         setLoadingPerformance(false);
       }
@@ -164,7 +197,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ resultFile, performanceReport
     // Fetch both datasets
     fetchRankingData();
     fetchPerformanceData();
-  }, [resultFile, performanceReport]);
+  }, [resultFile, performanceReport, toast]);
 
   
     
@@ -187,9 +220,21 @@ const ResultsView: React.FC<ResultsViewProps> = ({ resultFile, performanceReport
       // Clean up
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
+      
+      toast({
+        variant: "success",
+        title: "Download Started",
+        description: "Rankings file download has started.",
+      });
     } catch (error) {
       console.error('Error downloading rankings file:', error);
       setError('Failed to download rankings file. Please try again.');
+      
+      toast({
+        variant: "destructive",
+        title: "Download Failed",
+        description: "Failed to download rankings file. Please try again.",
+      });
     }
   };
 
@@ -213,9 +258,21 @@ const ResultsView: React.FC<ResultsViewProps> = ({ resultFile, performanceReport
       // Clean up
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
+      
+      toast({
+        variant: "success",
+        title: "Download Started",
+        description: "Performance report download has started.",
+      });
     } catch (error) {
       console.error('Error downloading performance report:', error);
       setError('Failed to download performance report. Please try again.');
+      
+      toast({
+        variant: "destructive",
+        title: "Download Failed",
+        description: "Failed to download performance report. Please try again.",
+      });
     }
   };
 
@@ -929,17 +986,17 @@ const ResultsView: React.FC<ResultsViewProps> = ({ resultFile, performanceReport
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead className="font-semibold text-violet-900 bg-violet-50/60">Plan ID</TableHead>
-                          <TableHead className="font-semibold text-violet-900 bg-violet-50/60">Publisher</TableHead>
-                          <TableHead className="font-semibold text-violet-900 bg-violet-50/60">Rank</TableHead>
-                          <TableHead className="font-semibold text-violet-900 bg-violet-50/60">Exp. Distribution</TableHead>
-                          <TableHead className="font-semibold text-violet-900 bg-violet-50/60">CTR</TableHead>
-                          <TableHead className="font-semibold text-violet-900 bg-violet-50/60">EPC</TableHead>
-                          <TableHead className="font-semibold text-violet-900 bg-violet-50/60">Revenue</TableHead>
-                          <TableHead className="font-semibold text-violet-900 bg-violet-50/60">Exp. Clicks</TableHead>
-                          <TableHead className="font-semibold text-violet-900 bg-violet-50/60">Budget Cap</TableHead>
-                          <TableHead className="font-semibold text-violet-900 bg-violet-50/60">Tags</TableHead>
-                          <TableHead className="font-semibold text-violet-900 bg-violet-50/60">Subcategory</TableHead>
+                          <TableHead className="font-semibold text-violet-900 bg-violet-100">Plan ID</TableHead>
+                          <TableHead className="font-semibold text-violet-900 bg-violet-100">Publisher</TableHead>
+                          <TableHead className="font-semibold text-violet-900 bg-violet-100">Rank</TableHead>
+                          <TableHead className="font-semibold text-violet-900 bg-violet-100">Exp. Distribution</TableHead>
+                          <TableHead className="font-semibold text-violet-900 bg-violet-100">CTR</TableHead>
+                          <TableHead className="font-semibold text-violet-900 bg-violet-100">EPC</TableHead>
+                          <TableHead className="font-semibold text-violet-900 bg-violet-100">Revenue</TableHead>
+                          <TableHead className="font-semibold text-violet-900 bg-violet-100">Exp. Clicks</TableHead>
+                          <TableHead className="font-semibold text-violet-900 bg-violet-100">Budget Cap</TableHead>
+                          <TableHead className="font-semibold text-violet-900 bg-violet-100">Tags</TableHead>
+                          <TableHead className="font-semibold text-violet-900 bg-violet-100">Subcategory</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
