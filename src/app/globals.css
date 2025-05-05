@@ -79,6 +79,11 @@
   --sidebar-accent-foreground: oklch(0.21 0.034 264.665);
   --sidebar-border: oklch(0.928 0.006 264.531);
   --sidebar-ring: oklch(0.707 0.022 261.325);
+
+  --background-light: #EEEEEE;
+  --foreground-light: #000000;
+  --background-dark: #121212;
+  --foreground-dark: #FFFFFF;
 }
 
 @theme inline {
@@ -468,8 +473,10 @@ body {
 }
 
 .dark {
-  --background: oklch(0.13 0.028 261.692);
-  --foreground: oklch(0.985 0.002 247.839);
+  --background: var(--background-dark);
+  --foreground: var(--foreground-dark);
+  background-color: var(--background-dark);
+  color: var(--foreground-dark);
   --card: oklch(0.21 0.034 264.665);
   --card-foreground: oklch(0.985 0.002 247.839);
   --popover: oklch(0.21 0.034 264.665);
@@ -618,4 +625,104 @@ body {
   .recharts-cartesian-axis-tick-value {
     font-size: 10px;
   }
+}
+
+/* Dark mode styles */
+.dark {
+  --background: var(--background-dark);
+  --foreground: var(--foreground-dark);
+  background-color: var(--background-dark);
+  color: var(--foreground-dark);
+}
+
+/* Light mode styles */
+:root:not(.dark) {
+  --background: var(--background-light);
+  --foreground: var(--foreground-light);
+  background-color: var(--background-light);
+  color: var(--foreground-light);
+}
+
+/* Add dark mode variants for components */
+.dark .card,
+.dark .modern-card {
+  background-color: #1E1E1E;
+  color: #FFFFFF;
+  border-color: #333333;
+}
+
+.dark .bg-white {
+  background-color: #1E1E1E;
+}
+
+.dark .bg-gray-50,
+.dark .bg-violet-50,
+.dark .bg-indigo-50,
+.dark .bg-sky-50,
+.dark .bg-amber-50,
+.dark .bg-emerald-50 {
+  background-color: #2A2A2A;
+}
+
+.dark .text-gray-800,
+.dark .text-black {
+  color: #FFFFFF;
+}
+
+.dark .text-gray-700,
+.dark .text-gray-600 {
+  color: #E0E0E0;
+}
+
+.dark .text-gray-500 {
+  color: #AAAAAA;
+}
+
+.dark .border-gray-100,
+.dark .border-gray-200 {
+  border-color: #333333;
+}
+
+.dark .bg-gradient-to-r {
+  background-image: linear-gradient(to right, #333333, #252525);
+}
+
+.dark .from-indigo-50,
+.dark .to-violet-50 {
+  --tw-gradient-from: #252525;
+  --tw-gradient-to: #333333;
+}
+
+.dark .shadow-sm,
+.dark .shadow-lg {
+  --tw-shadow-color: rgba(0, 0, 0, 0.5);
+}
+
+.dark input,
+.dark select,
+.dark textarea {
+  background-color: #2A2A2A;
+  color: #FFFFFF;
+  border-color: #444444;
+}
+
+.dark input::placeholder {
+  color: #888888;
+}
+
+.dark .table th {
+  background-color: #2A2A2A;
+  color: #FFFFFF;
+}
+
+.dark .table tr:hover {
+  background-color: #333333;
+}
+
+.dark .bg-gradient-primary {
+  background-image: linear-gradient(to right, #333333, #252525);
+}
+
+.dark .bg-violet-50\/60 {
+  background-color: #2D2D3D;
 }

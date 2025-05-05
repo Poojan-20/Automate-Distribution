@@ -24,11 +24,11 @@ const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanUpdate }) => {
 
   if (!plans || plans.length === 0) {
     return (
-      <div className="p-8 text-center rounded-xl border-2 border-dashed border-gray-200 bg-gray-50">
+      <div className="p-8 text-center rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
         <div className="flex flex-col items-center justify-center">
-          <ListFilter className="h-12 w-12 text-gray-400 mb-3" />
-          <h3 className="text-lg font-medium text-gray-700 mb-1">No Plan Data Available</h3>
-          <p className="text-gray-500">Please upload inventory file to see plan data here.</p>
+          <ListFilter className="h-12 w-12 text-gray-400 dark:text-gray-500 mb-3" />
+          <h3 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">No Plan Data Available</h3>
+          <p className="text-gray-500 dark:text-gray-400">Please upload inventory file to see plan data here.</p>
         </div>
       </div>
     );
@@ -177,12 +177,12 @@ const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanUpdate }) => {
   };
 
   return (
-    <div className="rounded-xl border border-gray-200 overflow-hidden bg-white w-full shadow-sm">
-      <div className="p-4 bg-gray-50 border-b border-gray-100">
+    <div className="rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden bg-white dark:bg-gray-800 w-full shadow-sm">
+      <div className="p-4 bg-gray-50 dark:bg-gray-900 border-b border-gray-100 dark:border-gray-700">
         {/* Search Bar */}
         <div className="flex flex-col">
-          <label className="text-gray-700 font-medium text-sm mb-2 flex items-center gap-2">
-            <Search className="h-4 w-4 text-gray-500" />
+          <label className="text-gray-700 dark:text-gray-300 font-medium text-sm mb-2 flex items-center gap-2">
+            <Search className="h-4 w-4 text-gray-500 dark:text-gray-400" />
             Search Plans
           </label>
           <div className="relative">
@@ -191,15 +191,15 @@ const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanUpdate }) => {
               placeholder="Search by Plan ID, Brand Name or Subcategory..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full py-2.5 pl-10 pr-4 rounded-lg bg-white text-gray-800 border border-gray-200 focus:border-violet-300 focus:ring focus:ring-violet-200 focus:ring-opacity-50"
+              className="w-full py-2.5 pl-10 pr-4 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-600 focus:border-violet-300 dark:focus:border-violet-500 focus:ring focus:ring-violet-200 dark:focus:ring-violet-500 focus:ring-opacity-50"
             />
             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <Search className="h-4 w-4 text-gray-400" />
+              <Search className="h-4 w-4 text-gray-400 dark:text-gray-500" />
             </div>
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -207,11 +207,11 @@ const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanUpdate }) => {
           </div>
 
           <div className="flex items-center justify-between mt-2">
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-gray-500 dark:text-gray-400">
               {filteredPlans.length} plan{filteredPlans.length !== 1 ? 's' : ''} found
             </span>
             {searchQuery && (
-              <span className="text-xs text-violet-600 font-medium">
+              <span className="text-xs text-violet-600 dark:text-violet-400 font-medium">
                 Filtering by: &quot;{searchQuery}&quot;
               </span>
             )}
@@ -223,31 +223,31 @@ const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanUpdate }) => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="bg-violet-50/60 text-violet-900 font-semibold whitespace-nowrap">
+              <TableHead className="bg-violet-50/60 dark:bg-violet-900/30 text-violet-900 dark:text-violet-300 font-semibold whitespace-nowrap">
                 Plan ID
               </TableHead>
-              <TableHead className="bg-violet-50/60 text-violet-900 font-semibold whitespace-nowrap">
+              <TableHead className="bg-violet-50/60 dark:bg-violet-900/30 text-violet-900 dark:text-violet-300 font-semibold whitespace-nowrap">
                 Publisher
               </TableHead>
-              <TableHead className="bg-violet-50/60 text-violet-900 font-semibold whitespace-nowrap">
+              <TableHead className="bg-violet-50/60 dark:bg-violet-900/30 text-violet-900 dark:text-violet-300 font-semibold whitespace-nowrap">
                 <div className="flex items-center gap-1">
                   <IndianRupee className="h-3.5 w-3.5" />
                   Budget Cap
                 </div>
               </TableHead>
-              <TableHead className="bg-violet-50/60 text-violet-900 font-semibold whitespace-nowrap">
+              <TableHead className="bg-violet-50/60 dark:bg-violet-900/30 text-violet-900 dark:text-violet-300 font-semibold whitespace-nowrap">
                 <div className="flex items-center gap-1">
                   <BarChart className="h-3.5 w-3.5" />
                   Avg Revenue
                 </div>
               </TableHead>
-              <TableHead className="bg-violet-50/60 text-violet-900 font-semibold whitespace-nowrap">
+              <TableHead className="bg-violet-50/60 dark:bg-violet-900/30 text-violet-900 dark:text-violet-300 font-semibold whitespace-nowrap">
                 Brand Name
               </TableHead>
-              <TableHead className="bg-violet-50/60 text-violet-900 font-semibold whitespace-nowrap">
+              <TableHead className="bg-violet-50/60 dark:bg-violet-900/30 text-violet-900 dark:text-violet-300 font-semibold whitespace-nowrap">
                 Subcategory
               </TableHead>
-              <TableHead className="bg-violet-50/60 text-violet-900 font-semibold whitespace-nowrap">
+              <TableHead className="bg-violet-50/60 dark:bg-violet-900/30 text-violet-900 dark:text-violet-300 font-semibold whitespace-nowrap">
                 <div className="flex items-center gap-1">
                   <Tag className="h-3.5 w-3.5" />
                   Tags & Requirements
@@ -260,9 +260,9 @@ const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanUpdate }) => {
             {filteredPlans.map((plan, index) => (
               <TableRow
                 key={plan.planId || index}
-                className="group hover:bg-violet-50/30 transition-colors"
+                className="group hover:bg-violet-50/30 dark:hover:bg-violet-900/10 transition-colors"
               >
-                <TableCell className="font-medium text-violet-900 whitespace-nowrap">
+                <TableCell className="font-medium text-violet-900 dark:text-violet-300 whitespace-nowrap">
                   {plan.planId}
                 </TableCell>
 
@@ -273,7 +273,7 @@ const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanUpdate }) => {
                         onClick={() => handleSelectAllPublishers(index)}
                         size="sm"
                         variant="outline"
-                        className="text-xs h-7 px-2 py-0 bg-violet-50 text-violet-700 border-violet-200 hover:bg-violet-100 hover:text-violet-800 hover:border-violet-300"
+                        className="text-xs h-7 px-2 py-0 bg-violet-50 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 border-violet-200 dark:border-violet-700 hover:bg-violet-100 dark:hover:bg-violet-800 hover:text-violet-800 dark:hover:text-violet-200 hover:border-violet-300 dark:hover:border-violet-600"
                       >
                         <Check className="h-3 w-3 mr-1" /> Select All
                       </Button>
@@ -281,7 +281,7 @@ const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanUpdate }) => {
                         onClick={() => handleClearAllPublishers(index)}
                         size="sm"
                         variant="outline"
-                        className="text-xs h-7 px-2 py-0 bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100"
+                        className="text-xs h-7 px-2 py-0 bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
                       >
                         <X className="h-3 w-3 mr-1" /> Clear
                       </Button>
@@ -296,8 +296,8 @@ const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanUpdate }) => {
                             onClick={() => handlePublisherChange(index, pub)}
                             className={`inline-flex items-center px-2.5 py-1.5 rounded-md text-xs font-medium transition-all duration-200
                             ${isSelected
-                                ? 'bg-blue-100 text-gray-700 hover:bg-violet-200 shadow-sm'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                ? 'bg-blue-100 dark:bg-blue-900/50 text-gray-700 dark:text-gray-200 hover:bg-violet-200 dark:hover:bg-violet-800 shadow-sm'
+                                : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
                               }`}
                           >
                             {pub}
@@ -314,7 +314,7 @@ const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanUpdate }) => {
                 <TableCell className="min-w-[130px]">
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                      <IndianRupee className="h-4 w-4 text-gray-400" />
+                      <IndianRupee className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                     </div>
                     <Input
                       type="number"
@@ -329,7 +329,7 @@ const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanUpdate }) => {
                           e.preventDefault();
                         }
                       }}
-                      className={`pl-9 py-1.5 h-9 bg-white text-gray-800 border-gray-200 focus:border-violet-300 focus:ring focus:ring-violet-200 focus:ring-opacity-50 ${
+                      className={`pl-9 py-1.5 h-9 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600 focus:border-violet-300 dark:focus:border-violet-500 focus:ring focus:ring-violet-200 dark:focus:ring-violet-500 focus:ring-opacity-50 ${
                         plan.tags.includes('FOC') || plan.tags.includes('Mandatory') ? 'opacity-50 cursor-not-allowed' : ''
                       }`}
                     />
@@ -340,14 +340,14 @@ const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanUpdate }) => {
                   {plan.avgRevenue ? `₹${plan.avgRevenue.toLocaleString()}` : '₹0'}
                 </TableCell>
 
-                <TableCell className="text-gray-800 whitespace-nowrap">
-                  <span className="px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-md text-xs font-medium">
+                <TableCell className="text-gray-800 dark:text-gray-200 whitespace-nowrap">
+                  <span className="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-md text-xs font-medium">
                     {plan.brand_name}
                   </span>
                 </TableCell>
 
-                <TableCell className="text-gray-800 whitespace-nowrap">
-                  <span className="px-2.5 py-1 bg-sky-50 text-sky-700 rounded-md text-xs font-medium">
+                <TableCell className="text-gray-800 dark:text-gray-200 whitespace-nowrap">
+                  <span className="px-2.5 py-1 bg-sky-50 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 rounded-md text-xs font-medium">
                     {plan.subcategory}
                   </span>
                 </TableCell>
@@ -364,8 +364,8 @@ const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanUpdate }) => {
                             onClick={() => handleTagSelect(index, tag)}
                             className={`inline-flex items-center px-2.5 py-1.5 rounded-md text-xs font-medium transition-all duration-200
                               ${isSelected
-                                ? 'bg-amber-100 text-amber-700 hover:bg-amber-200 shadow-sm'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                ? 'bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-800 shadow-sm'
+                                : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
                               }`}
                           >
                             {tag}

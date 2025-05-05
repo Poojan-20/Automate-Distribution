@@ -167,16 +167,20 @@ export default function FileUpload({ onProcessed }: FileUploadProps) {
   };
 
   return (
-    <Card className="bg-white rounded-lg shadow-lg">
-      <CardHeader className="border-b border-gray-100">
-        <CardTitle className="text-xl font-semibold text-gray-800">Upload Files</CardTitle>
-        <CardDescription className="text-gray-600">
-          Upload your files to compare and validate their contents
-        </CardDescription>
+    <Card className="bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+      <CardHeader className="border-b border-gray-100 dark:border-gray-700">
+        <div className="flex justify-between items-center">
+          <div>
+            <CardTitle className="text-xl font-semibold text-gray-800 dark:text-white">Upload Files</CardTitle>
+            <CardDescription className="text-gray-600 dark:text-gray-300">
+              Upload your files to compare and validate their contents
+            </CardDescription>
+          </div>
+        </div>
       </CardHeader>
       <CardContent className="space-y-6 p-6">
         {error && (
-          <Alert variant="destructive" className="mb-6">
+          <Alert variant="destructive" className="mb-6 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800/30">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>{error}</AlertDescription>
           </Alert>
@@ -184,11 +188,11 @@ export default function FileUpload({ onProcessed }: FileUploadProps) {
 
         <div className="grid gap-6 md:grid-cols-2">
           <div>
-            <label className="text-sm font-medium text-gray-700 mb-2 block">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
               File 1 - Inventory Report
             </label>
             <div 
-              className="border-2 border-dashed border-gray-200 rounded-lg p-6 flex flex-col items-center justify-center bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer"
+              className="border-2 border-dashed border-gray-200 dark:border-gray-600 rounded-lg p-6 flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
               onDrop={handleInventoryDrop}
               onDragOver={handleDragOver}
             >
@@ -251,11 +255,11 @@ export default function FileUpload({ onProcessed }: FileUploadProps) {
           </div>
 
           <div>
-            <label className="text-sm font-medium text-gray-700 mb-2 block">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
               File 2 - Historical Data
             </label>
             <div 
-              className="border-2 border-dashed border-gray-200 rounded-lg p-6 flex flex-col items-center justify-center bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer"
+              className="border-2 border-dashed border-gray-200 dark:border-gray-600 rounded-lg p-6 flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
               onDrop={handleHistoricalDrop}
               onDragOver={handleDragOver}
             >
@@ -309,9 +313,9 @@ export default function FileUpload({ onProcessed }: FileUploadProps) {
           </div>
         </div>
       </CardContent>
-      <CardFooter className="bg-gray-50 border-t border-gray-100 p-6">
+      <CardFooter className="bg-gray-50 dark:bg-gray-900 border-t border-gray-100 dark:border-gray-700 p-6">
         <Button 
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3"
+          className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-800 dark:hover:bg-blue-900 text-white py-3"
           onClick={handleSubmit}
           disabled={!inventoryFile || !historicalFile || isLoading || !inventoryData}
         >

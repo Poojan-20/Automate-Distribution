@@ -363,44 +363,48 @@ const DataReview: React.FC<DataReviewProps> = ({ inventoryData, historicalFile, 
   };
 
   return (
-    <Card className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
-      <CardHeader className="border-b border-gray-100 bg-gradient-to-r from-indigo-50 to-violet-50 px-6 py-5">
-        <CardTitle className="text-xl font-semibold text-gray-800 flex items-center gap-2">
-          <FileCheck className="h-5 w-5 text-violet-600" strokeWidth={2} />
-          Review Data
-        </CardTitle>
-        <CardDescription className="text-gray-600 mt-1">
-          Review and complete the extracted data before generating rankings
-        </CardDescription>
+    <Card className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden">
+      <CardHeader className="border-b border-gray-100 dark:border-gray-700 bg-gradient-to-r from-indigo-50 to-violet-50 dark:from-gray-800 dark:to-gray-700 px-6 py-5">
+        <div className="flex justify-between items-center">
+          <div>
+            <CardTitle className="text-xl font-semibold text-gray-800 dark:text-white flex items-center gap-2">
+              <FileCheck className="h-5 w-5 text-violet-600 dark:text-violet-400" strokeWidth={2} />
+              Review Data
+            </CardTitle>
+            <CardDescription className="text-gray-600 dark:text-gray-300 mt-1">
+              Review and complete the extracted data before generating rankings
+            </CardDescription>
+          </div>
+        </div>
       </CardHeader>
       
       <CardContent className="p-6 space-y-6">
         <div className="flex flex-col gap-4">
           {error && (
-            <Alert variant="destructive" className="border-red-200 bg-red-50 text-red-800">
-              <AlertCircle className="h-4 w-4 text-red-600" />
+            <Alert variant="destructive" className="border-red-200 bg-red-50 text-red-800 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800/30">
+              <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
           
           {warning && (
-            <Alert className="border-amber-200 bg-amber-50 text-amber-800">
-              <AlertTriangle className="h-4 w-4 text-amber-600" />
+            <Alert className="border-amber-200 bg-amber-50 text-amber-800 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-800/30">
+              <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
               <AlertDescription>{warning}</AlertDescription>
             </Alert>
           )}
           
           {success && (
-            <Alert className="border-emerald-200 bg-emerald-50 text-emerald-800">
-              <CheckCircle className="h-4 w-4 text-emerald-600" />
+            <Alert className="border-emerald-200 bg-emerald-50 text-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-800/30">
+              <CheckCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
               <AlertDescription>{success}</AlertDescription>
             </Alert>
           )}
         </div>
 
-        <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
-          <h3 className="text-lg font-medium text-gray-800 mb-3 flex items-center gap-2">
-            <BarChart className="h-5 w-5 text-violet-600" />
+        <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
+          <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
+            <BarChart className="h-5 w-5 text-violet-600 dark:text-violet-400" />
             Data Summary
           </h3>
           
@@ -436,9 +440,9 @@ const DataReview: React.FC<DataReviewProps> = ({ inventoryData, historicalFile, 
         </div>
       </CardContent>
       
-      <CardFooter className="bg-gray-50 border-t border-gray-100 px-6 py-5">
+      <CardFooter className="bg-gray-50 dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 px-6 py-5">
         <Button 
-          className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white py-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 font-medium text-base"
+          className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white py-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 font-medium text-base dark:from-violet-800 dark:to-indigo-800 dark:hover:from-violet-900 dark:hover:to-indigo-900"
           onClick={handleProcessData}
           disabled={isSubmitting || !plans || plans.length === 0}
         >

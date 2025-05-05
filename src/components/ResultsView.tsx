@@ -18,7 +18,7 @@ import {
   TrendingUp
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { Line, LineChart, CartesianGrid, XAxis, YAxis, Dot,Label, Pie, PieChart, } from "recharts";
+import { Line, LineChart, CartesianGrid, XAxis, YAxis, Dot,Label, Pie, PieChart} from "recharts";
 import {
   ChartConfig,
   ChartContainer,
@@ -278,30 +278,17 @@ const ResultsView: React.FC<ResultsViewProps> = ({ resultFile, performanceReport
 
   // Helper function to render rank badge
   const renderRankBadge = (rank: number) => {
-    let badgeClass = 'rank-badge ';
-    
     if (rank === 1) {
-      // Green for top rank (best)
-      badgeClass += 'rank-1';
+      return <div className="px-3 py-1 bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300 font-bold rounded-full shadow-sm text-center">{rank}</div>;
     } else if (rank === 2) {
-      // Orange/amber for middle ranks
-      badgeClass += 'rank-2';
+      return <div className="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300 font-bold rounded-full shadow-sm text-center">{rank}</div>;
     } else if (rank === 3) {
-      // Orange/amber for middle ranks
-      badgeClass += 'rank-3';
+      return <div className="px-3 py-1 bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 font-bold rounded-full shadow-sm text-center">{rank}</div>;
     } else if (rank <= 10) {
-      // Red for lower ranks
-      badgeClass += 'rank-top-10';
+      return <div className="px-3 py-1 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 font-bold rounded-full shadow-sm text-center">{rank}</div>;
     } else {
-      // Darker red for worst ranks
-      badgeClass += 'rank-regular';
+      return <div className="px-3 py-1 bg-violet-50 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400 font-medium rounded-full text-center">{rank}</div>;
     }
-    
-    return (
-      <div className={badgeClass}>
-        {rank}
-      </div>
-    );
   };
 
   // Define chart colors for publishers
@@ -496,28 +483,28 @@ const ResultsView: React.FC<ResultsViewProps> = ({ resultFile, performanceReport
                     data={publisherData}
                     margin={{ top: 24, right: 24, left: 24, bottom: 24 }}
                   >
-                    <CartesianGrid vertical={false} strokeDasharray="4 4" stroke="#211f1f" />
+                    <CartesianGrid vertical={false} strokeDasharray="4 4" stroke="#211f1f" className="dark:stroke-gray-700" />
                     <XAxis 
-                      dataKey="publisher"
-                      tick={{ fontSize: 12, fill: '#0d0c0c' }}
+                      dataKey="publisher" 
+                      tick={{ fontSize: 12, fill: '#0d0c0c', className: "dark:fill-gray-300" }}
                     />
                     <YAxis 
                       tickFormatter={(value) => value.toFixed(2)}
-                      tick={{ fontSize: 12, fill: '#0d0c0c' }}
+                      tick={{ fontSize: 12, fill: '#0d0c0c', className: "dark:fill-gray-300" }}
                     />
                     <ChartTooltip
                       cursor={false}
                       content={
                         <ChartTooltipContent
                           indicator="line"
-                          className='text-black'
+                          className='text-black dark:text-white'
                           labelFormatter={(label) => `Publisher: ${label}`}
                         />
                       }
                     />
-                    <Line
+                    <Line 
                       dataKey="epc"
-                      type="monotone"
+                      type="monotone" 
                       stroke="#06b6d4" // Hardcoded Cyan color
                       strokeWidth={2}
                       dot={({ payload, ...props }) => {
@@ -529,8 +516,8 @@ const ResultsView: React.FC<ResultsViewProps> = ({ resultFile, performanceReport
                             cy={props.cy}
                             fill={payload.fill}
                             stroke={payload.fill}
+                            className="dark:text-white"
                           />
-                          
                         )
                       }}
                     />
@@ -577,29 +564,29 @@ const ResultsView: React.FC<ResultsViewProps> = ({ resultFile, performanceReport
                     data={publisherData}
                     margin={{ top: 24, right: 24, left: 24, bottom: 24 }}
                   >
-                    <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#211f1f" />
+                    <CartesianGrid vertical={false} strokeDasharray="4 4" stroke="#211f1f" className="dark:stroke-gray-700" />
                     <XAxis 
-                      dataKey="publisher"
-                      tick={{ fontSize: 12, fill: '#0d0c0c' }}
+                      dataKey="publisher" 
+                      tick={{ fontSize: 12, fill: '#0d0c0c', className: "dark:fill-gray-300" }}
                     />
                     <YAxis 
                       tickFormatter={(value) => `${value.toFixed(2)}%`}
-                      tick={{ fontSize: 12, fill: '#0d0c0c' }}
+                      tick={{ fontSize: 12, fill: '#0d0c0c', className: "dark:fill-gray-300" }}
                     />
                     <ChartTooltip
                       cursor={false}
                       content={
                         <ChartTooltipContent
                           indicator="line"
-                          className='text-black'
+                          className='text-black dark:text-white'
                           labelFormatter={(label) => `Publisher: ${label}`}
                         />
                       }
                     />
-                    <Line
+                    <Line 
                       dataKey="ctr"
-                      type="monotone"
-                      stroke="#8b5cf6" // Hardcoded Violet color
+                      type="monotone" 
+                      stroke="#8b5cf6" 
                       strokeWidth={2}
                       dot={({ payload, ...props }) => {
                         return (
@@ -610,6 +597,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ resultFile, performanceReport
                             cy={props.cy}
                             fill={payload.fill}
                             stroke={payload.fill}
+                            className="dark:text-white"
                           />
                         )
                       }}
@@ -691,7 +679,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ resultFile, performanceReport
                         content={
                           <ChartTooltipContent
                             indicator="line"
-                            className='text-black'
+                            className='text-black dark:text-white'
                             labelFormatter={(label) => `Publisher: ${label}`}
                           />
                         }
@@ -717,19 +705,18 @@ const ResultsView: React.FC<ResultsViewProps> = ({ resultFile, performanceReport
                                   y={viewBox.cy}
                                   textAnchor="middle"
                                   dominantBaseline="middle"
-                                  className="text-black"
                                 >
                                   <tspan
                                     x={viewBox.cx}
                                     y={viewBox.cy}
-                                    className="fill-black text-2xl font-bold"
+                                    className="fill-black dark:fill-gray-200 text-2xl font-bold"
                                   >
                                     {formatPieChartValue(totalValue, selectedMetric)}
                                   </tspan>
                                   <tspan
                                     x={viewBox.cx}
                                     y={(viewBox.cy as number) + 24}
-                                    className="fill-black text-sm"
+                                    className="fill-black dark:fill-gray-200 text-sm"
                                   >
                                     Total {selectedMetric}
                                   </tspan>
@@ -741,7 +728,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ resultFile, performanceReport
                         />
                       </Pie>
                       <ChartLegend
-                        content={<ChartLegendContent nameKey="publisher" className="!text-gray-800 text-sm" />}
+                        content={<ChartLegendContent nameKey="publisher" className="!text-gray-800 dark:!text-gray-200 text-sm m-2" />}
                         verticalAlign="bottom"
                       />
                     </PieChart>
@@ -895,240 +882,367 @@ const ResultsView: React.FC<ResultsViewProps> = ({ resultFile, performanceReport
   };
 
   return (
-    <>
-    <Card className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
-      <CardHeader className="border-b border-gray-100 bg-gradient-to-r from-indigo-50 to-purple-50 px-6 py-5">
-        <div className="flex justify-between items-center">
-          <CardTitle className="text-xl font-semibold text-gray-800 flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-violet-600" strokeWidth={2} />
-            Distribution Rankings
-          </CardTitle>
-          
-          <div className="flex gap-2">
-            {performanceReport && (
-              <Button 
-                onClick={downloadPerformanceReport}
-                className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white px-4 py-2 rounded-lg text-sm flex items-center gap-2"
-              >
-                <FileBarChart2 className="h-4 w-4" />
-                Overall Performance Report
-              </Button>
-            )}
-            
-            <Button 
-              onClick={downloadRankingsFile}
-              className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-4 py-2 rounded-lg text-sm flex items-center gap-2"
-            >
-              <Download className="h-4 w-4" />
-              Download Rankings
-            </Button>
-          </div>
-        </div>
-        <div className="flex flex-col mt-2 space-y-1">
-          <div className="flex items-center">
-            <FileSpreadsheet className="h-4 w-4 text-gray-500 mr-2" />
-            <p className="text-sm text-gray-500">Rankings file: {resultFile}</p>
-          </div>
-          
-          {performanceReport && (
-            <div className="flex items-center">
-              <FileBarChart2 className="h-4 w-4 text-blue-500 mr-2" />
-              <p className="text-sm text-blue-600">Performance report available: {performanceReport}</p>
+    <div className="space-y-6">
+      <Card className="bg-white dark:bg-gray-800 shadow-lg rounded-xl overflow-hidden">
+        <CardHeader className="border-b border-gray-100 dark:border-gray-700 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-gray-800 dark:to-gray-700 px-6 py-5">
+          <div className="flex justify-between items-center">
+            <div>
+              <CardTitle className="text-xl font-semibold text-gray-800 dark:text-white flex items-center gap-2">
+                <FileBarChart2 className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+                Plan Rankings & Performance Analysis
+              </CardTitle>
+              <CardDescription className="text-gray-600 dark:text-gray-300">
+                View the optimized plan rankings and performance metrics
+              </CardDescription>
             </div>
-          )}
-        </div>
-      </CardHeader>
-      
-      <CardContent className="p-0">
-        <div className="p-4">
-          <Tab.Group>
-            <Tab.List className="flex space-x-1 rounded-xl bg-violet-50/70 p-1.5">
-              <Tab
-                key="all"
-                className={({ selected }) =>
-                  `w-full rounded-lg py-2.5 text-sm font-medium leading-5 transition-all duration-200
-                  ${selected 
-                    ? 'bg-white text-violet-700 shadow-sm' 
-                    : 'text-violet-600 hover:bg-white/60 hover:text-violet-700'
-                  }`
-                }
-              >
-                All Rankings
-              </Tab>
-              
-              {publishers.map((publisher) => (
-                <Tab
-                  key={publisher}
-                  className={({ selected }) =>
-                    `w-full rounded-lg py-2.5 text-sm font-medium leading-5 transition-all duration-200
-                    ${selected 
-                      ? 'bg-white text-violet-700 shadow-sm' 
-                      : 'text-violet-600 hover:bg-white/60 hover:text-violet-700'
-                    }`
-                  }
-                >
-                  {publisher}
-                </Tab>
-              ))}
-            </Tab.List>
-            
-            <Tab.Panels className="mt-4">
-              <Tab.Panel key="all-panel" className="rounded-xl bg-white p-3">
-                <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2 mb-4 px-2">
-                  <span className="inline-flex items-center justify-center w-6 h-6 bg-violet-100 text-violet-700 rounded-full text-xs font-bold">
-                    A
-                  </span>
-                  Overall Rankings
-                </h3>
-                
-                {rankingData?.all_publishers && rankingData.all_publishers.length > 0 ? (
-                  <div className="overflow-x-auto modern-table rounded-xl">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="font-semibold text-violet-900 bg-violet-100">Plan ID</TableHead>
-                          <TableHead className="font-semibold text-violet-900 bg-violet-100">Publisher</TableHead>
-                          <TableHead className="font-semibold text-violet-900 bg-violet-100">Rank</TableHead>
-                          <TableHead className="font-semibold text-violet-900 bg-violet-100">Exp. Distribution</TableHead>
-                          <TableHead className="font-semibold text-violet-900 bg-violet-100">CTR</TableHead>
-                          <TableHead className="font-semibold text-violet-900 bg-violet-100">EPC</TableHead>
-                          <TableHead className="font-semibold text-violet-900 bg-violet-100">Revenue</TableHead>
-                          <TableHead className="font-semibold text-violet-900 bg-violet-100">Exp. Clicks</TableHead>
-                          <TableHead className="font-semibold text-violet-900 bg-violet-100">Budget Cap</TableHead>
-                          <TableHead className="font-semibold text-violet-900 bg-violet-100">Tags</TableHead>
-                          <TableHead className="font-semibold text-violet-900 bg-violet-100">Subcategory</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {rankingData.all_publishers.map((item, idx) => (
-                          <TableRow key={`${item.plan_id}-${idx}`} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}>
-                            <TableCell className="font-medium text-violet-900">{item.plan_id}</TableCell>
-                            <TableCell>
-                              <span className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-medium">
-                                {item.publisher}
-                              </span>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex justify-center">
-                                {renderRankBadge(item.final_rank)}
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-gray-800">{formatNumber(item.distribution, 'Distribution')}</TableCell>
-                            <TableCell className="text-gray-800">{formatNumber(item.CTR, 'CTR')}</TableCell>
-                            <TableCell className="text-gray-800">{formatNumber(item.EPC, 'EPC')}</TableCell>
-                            <TableCell className="font-medium text-emerald-700">{formatNumber(item.avg_revenue, 'Revenue')}</TableCell>
-                            
-                            <TableCell className="text-blue-700">{formatNumber(item.expected_clicks, 'ExpectedClicks')}</TableCell>
-                            <TableCell className="text-gray-800">{formatNumber(item.budget_cap, 'BudgetCap')}</TableCell>
-                            <TableCell>
-                              <div className="flex flex-wrap gap-1">
-                                {item.tags.split(';').map((tag: string) => (
-                                  <span key={tag} className="px-2 py-0.5 bg-violet-50 text-violet-700 rounded-md text-xs">
-                                    {tag}
-                                  </span>
-                                ))}
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-gray-800">{item.subcategory || '-'}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                ) : (
-                  <div className="text-center py-10 bg-gray-50 rounded-xl">
-                    <p className="text-gray-500">No ranking data available</p>
-                  </div>
-                )}
-              </Tab.Panel>
-              
-              {publishers.map((publisher) => (
-                <Tab.Panel key={`${publisher}-panel`} className="rounded-xl bg-white p-3">
-                  <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2 mb-4 px-2">
-                    <span className="inline-flex items-center justify-center w-6 h-6 bg-violet-100 text-violet-700 rounded-full text-xs font-bold">
-                      {publisher.charAt(0)}
-                    </span>
-                    {publisher} Rankings
-                  </h3>
-                  
-                  {rankingData?.by_publisher && rankingData.by_publisher[publisher] && rankingData.by_publisher[publisher].length > 0 ? (
-                    <div className="overflow-x-auto modern-table rounded-xl">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="font-semibold text-violet-900 bg-violet-50/60">Plan ID</TableHead>
-                            <TableHead className="font-semibold text-violet-900 bg-violet-50/60">Publisher</TableHead>
-                            <TableHead className="font-semibold text-violet-900 bg-violet-50/60">Rank</TableHead>
-                            <TableHead className="font-semibold text-violet-900 bg-violet-50/60">Exp. Distribution</TableHead>
-                            <TableHead className="font-semibold text-violet-900 bg-violet-50/60">CTR</TableHead>
-                            <TableHead className="font-semibold text-violet-900 bg-violet-50/60">EPC</TableHead>
-                            <TableHead className="font-semibold text-violet-900 bg-violet-50/60">Revenue</TableHead>
-                            <TableHead className="font-semibold text-violet-900 bg-violet-50/60">Exp. Clicks</TableHead>
-                            <TableHead className="font-semibold text-violet-900 bg-violet-50/60">Budget Cap</TableHead>
-                            <TableHead className="font-semibold text-violet-900 bg-violet-50/60">Tags</TableHead>
-                            <TableHead className="font-semibold text-violet-900 bg-violet-50/60">Subcategory</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {rankingData.by_publisher[publisher].map((item, idx) => (
-                            <TableRow key={`${item.plan_id}-${idx}`} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}>
-                              <TableCell className="font-medium text-violet-900">{item.plan_id}</TableCell>
-                              <TableCell>
-                                <span className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-medium">
-                                  {item.publisher}
-                                </span>
-                              </TableCell>
-                              <TableCell>
-                                <div className="flex justify-center">
-                                  {renderRankBadge(item.final_rank)}
-                                </div>
-                              </TableCell>
-                              <TableCell className="text-gray-800">{formatNumber(item.distribution, 'Distribution')}</TableCell>
-                              <TableCell className="text-gray-800">{formatNumber(item.CTR, 'CTR')}</TableCell>
-                              <TableCell className="text-gray-800">{formatNumber(item.EPC, 'EPC')}</TableCell>
-                              <TableCell className="font-medium text-emerald-700">{formatNumber(item.avg_revenue, 'Revenue')}</TableCell>
-                              <TableCell className="text-blue-700">{formatNumber(item.expected_clicks, 'ExpectedClicks')}</TableCell>
-                              <TableCell className="text-gray-800">{formatNumber(item.budget_cap, 'BudgetCap')}</TableCell>
-                              <TableCell>
-                                <div className="flex flex-wrap gap-1">
-                                  {item.tags.split(';').map((tag: string) => (
-                                    <span key={tag} className="px-2 py-0.5 bg-violet-50 text-violet-700 rounded-md text-xs">
-                                      {tag}
-                                    </span>
-                                  ))}
-                                </div>
-                              </TableCell>
-                              <TableCell className="text-gray-800">{item.subcategory || '-'}</TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-                  ) : (
-                    <div className="text-center py-10 bg-gray-50 rounded-xl">
-                      <p className="text-gray-500">No ranking data available for {publisher}</p>
-                    </div>
-                  )}
-                </Tab.Panel>
-              ))}
-            </Tab.Panels>
-          </Tab.Group>
-        </div>
+          </div>
+        </CardHeader>
         
+        <CardContent className="p-6">
+          {error ? (
+            <Alert variant="destructive" className="mb-6 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800/30">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          ) : loading ? (
+            <div className="flex flex-col items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 text-violet-600 dark:text-violet-400 animate-spin mb-4" />
+              <p className="text-gray-600 dark:text-gray-300">Loading ranking data...</p>
+            </div>
+          ) : (
+            <>
+              <Tab.Group>
+                <Tab.List className="flex space-x-1 rounded-xl bg-violet-50/70 dark:bg-gray-800 p-1.5">
+                  <Tab
+                    key="all"
+                    className={({ selected }) =>
+                      `w-full rounded-lg py-2.5 text-sm font-medium leading-5 transition-all duration-200
+                      ${selected
+                        ? 'bg-white dark:bg-gray-700 text-violet-700 dark:text-violet-300 shadow-sm' 
+                        : 'text-violet-600 dark:text-violet-400 hover:bg-white/60 dark:hover:bg-gray-600/40 hover:text-violet-700 dark:hover:text-violet-300'
+                      }`
+                    }
+                  >
+                    All Rankings
+                  </Tab>
+                  
+                  {publishers.map((publisher) => (
+                    <Tab
+                      key={publisher}
+                      className={({ selected }) =>
+                        `w-full rounded-lg py-2.5 text-sm font-medium leading-5 transition-all duration-200
+                        ${selected
+                          ? 'bg-white dark:bg-gray-700 text-violet-700 dark:text-violet-300 shadow-sm' 
+                          : 'text-violet-600 dark:text-violet-400 hover:bg-white/60 dark:hover:bg-gray-600/40 hover:text-violet-700 dark:hover:text-violet-300'
+                        }`
+                      }
+                    >
+                      {publisher}
+                    </Tab>
+                  ))}
 
-        <div className="flex justify-center p-6 bg-gray-50 border-t border-gray-100">
+                  {performanceReport && (
+                    <Tab
+                      key="performance"
+                      className={({ selected }) =>
+                        `w-full rounded-lg py-2.5 text-sm font-medium leading-5 transition-all duration-200
+                        ${selected
+                          ? 'bg-white dark:bg-gray-700 text-violet-700 dark:text-violet-300 shadow-sm' 
+                          : 'text-violet-600 dark:text-violet-400 hover:bg-white/60 dark:hover:bg-gray-600/40 hover:text-violet-700 dark:hover:text-violet-300'
+                        }`
+                      }
+                    >
+                      Performance
+                    </Tab>
+                  )}
+                </Tab.List>
+                
+                <Tab.Panels>
+                  <Tab.Panel key="all-panel" className="rounded-xl bg-white p-3">
+                    <div className="flex justify-between items-center mb-4 px-2">
+                      <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                        <span className="inline-flex items-center justify-center w-6 h-6 bg-violet-100 text-violet-700 rounded-full text-xs font-bold">
+                          A
+                        </span>
+                        Overall Rankings
+                      </h3>
+                      <Button 
+                        onClick={downloadRankingsFile}
+                        className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center gap-2 transition-colors dark:bg-green-700 dark:hover:bg-green-800"
+                      >
+                        <Download className="h-4 w-4" /> Download Rankings
+                      </Button>
+                    </div>
+                    
+                    {rankingData?.all_publishers && rankingData.all_publishers.length > 0 ? (
+                      <div className="overflow-x-auto modern-table rounded-xl">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
+                                Rank
+                              </TableHead>
+                              <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
+                                Plan ID
+                              </TableHead>
+                              <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
+                                Publisher
+                              </TableHead>
+                              <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
+                                Exp. Distribution
+                              </TableHead>
+                              <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
+                                CTR
+                              </TableHead>
+                              <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
+                                EPC
+                              </TableHead>
+                              <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
+                                Revenue
+                              </TableHead>
+                              <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
+                                Exp. Clicks
+                              </TableHead>
+                              <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
+                                Budget Cap
+                              </TableHead>
+                              <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
+                                Tags
+                              </TableHead>
+                              <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
+                                Subcategory
+                              </TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {rankingData.all_publishers.map((item, idx) => (
+                              <TableRow 
+                                key={`${item.plan_id}-${idx}`} 
+                                className={`${idx % 2 === 0 
+                                  ? 'bg-white dark:bg-gray-800' 
+                                  : 'bg-gray-50/50 dark:bg-gray-700/50'
+                                } hover:bg-violet-50/20 dark:hover:bg-violet-900/20 transition-colors`}
+                              >
+                                <TableCell className="font-medium text-violet-900 dark:text-violet-300">{renderRankBadge(item.final_rank)}</TableCell>
+                                <TableCell className="font-medium text-violet-900 dark:text-violet-300">{item.plan_id}</TableCell>
+                                <TableCell className="font-medium text-gray-800 dark:text-gray-300">{item.publisher}</TableCell>
+                                <TableCell className="text-gray-800 dark:text-gray-200">{formatNumber(item.distribution, 'Distribution')}</TableCell>
+                                <TableCell className="text-gray-800 dark:text-gray-200">{formatNumber(item.CTR, 'CTR')}</TableCell>
+                                <TableCell className="text-gray-800 dark:text-gray-200">{formatNumber(item.EPC, 'EPC')}</TableCell>
+                                <TableCell className="font-medium text-emerald-700 dark:text-emerald-400">{formatNumber(item.avg_revenue, 'Revenue')}</TableCell>
+                                <TableCell className="text-blue-700 dark:text-blue-400">{formatNumber(item.expected_clicks, 'ExpectedClicks')}</TableCell>
+                                <TableCell className="text-gray-800 dark:text-gray-200">{formatNumber(item.budget_cap, 'BudgetCap')}</TableCell>
+                                <TableCell>
+                                  <span className="px-2.5 py-1 rounded-md bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 text-xs font-medium">
+                                    {item.tags.split(';').join(', ')}
+                                  </span>
+                                </TableCell>
+                                <TableCell>
+                                  <span className="px-2.5 py-1 rounded-md bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300 text-xs font-medium">
+                                    {item.subcategory || '-'}
+                                  </span>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    ) : (
+                      <div className="text-center py-10 bg-gray-50 rounded-xl">
+                        <p className="text-gray-500">No ranking data available</p>
+                      </div>
+                    )}
+                  </Tab.Panel>
+                  
+                  {publishers.map((publisher) => (
+                    <Tab.Panel key={`${publisher}-panel`} className="rounded-xl bg-white p-3">
+                      <div className="flex justify-between items-center mb-4 px-2">
+                        <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                          <span className="inline-flex items-center justify-center w-6 h-6 bg-violet-100 text-violet-700 rounded-full text-xs font-bold">
+                            {publisher.charAt(0)}
+                          </span>
+                          {publisher} Rankings
+                        </h3>
+                        <Button 
+                          onClick={downloadRankingsFile}
+                          className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center gap-2 transition-colors dark:bg-green-700 dark:hover:bg-green-800"
+                        >
+                          <Download className="h-4 w-4" /> Download Rankings
+                        </Button>
+                      </div>
+                      
+                      {rankingData?.by_publisher && rankingData.by_publisher[publisher] && rankingData.by_publisher[publisher].length > 0 ? (
+                        <div className="overflow-x-auto modern-table rounded-xl">
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
+                                  Rank
+                                </TableHead>
+                                <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
+                                  Plan ID
+                                </TableHead>
+                                <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
+                                  Publisher
+                                </TableHead>
+                                <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
+                                  Exp. Distribution
+                                </TableHead>
+                                <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
+                                  CTR
+                                </TableHead>
+                                <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
+                                  EPC
+                                </TableHead>
+                                <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
+                                  Revenue
+                                </TableHead>
+                                <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
+                                  Exp. Clicks
+                                </TableHead>
+                                <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
+                                  Budget Cap
+                                </TableHead>
+                                <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
+                                  Tags
+                                </TableHead>
+                                <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
+                                  Subcategory
+                                </TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {rankingData.by_publisher[publisher].map((item, idx) => (
+                                <TableRow 
+                                  key={`${item.plan_id}-${idx}`} 
+                                  className={`${idx % 2 === 0 
+                                    ? 'bg-white dark:bg-gray-800' 
+                                    : 'bg-gray-50/50 dark:bg-gray-700/50'
+                                  } hover:bg-violet-50/20 dark:hover:bg-violet-900/20 transition-colors`}
+                                >
+                                  <TableCell className="font-medium text-violet-900 dark:text-violet-300">{renderRankBadge(item.final_rank)}</TableCell>
+                                  <TableCell className="font-medium text-violet-900 dark:text-violet-300">{item.plan_id}</TableCell>
+                                  <TableCell className="font-medium text-gray-800 dark:text-gray-300">{item.publisher}</TableCell>
+                                  <TableCell className="text-gray-800 dark:text-gray-200">{formatNumber(item.distribution, 'Distribution')}</TableCell>
+                                  <TableCell className="text-gray-800 dark:text-gray-200">{formatNumber(item.CTR, 'CTR')}</TableCell>
+                                  <TableCell className="text-gray-800 dark:text-gray-200">{formatNumber(item.EPC, 'EPC')}</TableCell>
+                                  <TableCell className="font-medium text-emerald-700 dark:text-emerald-400">{formatNumber(item.avg_revenue, 'Revenue')}</TableCell>
+                                  <TableCell className="text-blue-700 dark:text-blue-400">{formatNumber(item.expected_clicks, 'ExpectedClicks')}</TableCell>
+                                  <TableCell className="text-gray-800 dark:text-gray-200">{formatNumber(item.budget_cap, 'BudgetCap')}</TableCell>
+                                  <TableCell>
+                                    <span className="px-2.5 py-1 rounded-md bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 text-xs font-medium">
+                                      {item.tags.split(';').join(', ')}
+                                    </span>
+                                  </TableCell>
+                                  <TableCell>
+                                    <span className="px-2.5 py-1 rounded-md bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300 text-xs font-medium">
+                                      {item.subcategory || '-'}
+                                    </span>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      ) : (
+                        <div className="text-center py-10 bg-gray-50 rounded-xl">
+                          <p className="text-gray-500">No ranking data available for {publisher}</p>
+                        </div>
+                      )}
+                    </Tab.Panel>
+                  ))}
+
+                  {performanceReport && (
+                    <Tab.Panel key="performance-panel" className="rounded-xl bg-white p-3">
+                      <div className="flex justify-between items-center mb-4 px-2">
+                        <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                          <span className="inline-flex items-center justify-center w-6 h-6 bg-violet-100 text-violet-700 rounded-full text-xs font-bold">
+                            P
+                          </span>
+                          Performance Data
+                        </h3>
+                        <Button 
+                          onClick={downloadPerformanceReport}
+                          className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg flex items-center gap-2 transition-colors dark:bg-amber-700 dark:hover:bg-amber-800"
+                        >
+                          <FileSpreadsheet className="h-4 w-4" /> Download Performance Report
+                        </Button>
+                      </div>
+                      
+                      {performanceData && performanceData.length > 0 ? (
+                        <div className="overflow-x-auto modern-table rounded-xl">
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead className="bg-amber-50/60 dark:bg-amber-900/20 text-amber-900 dark:text-amber-300 font-semibold">
+                                  Publisher
+                                </TableHead>
+                                <TableHead className="bg-amber-50/60 dark:bg-amber-900/20 text-amber-900 dark:text-amber-300 font-semibold">
+                                  Plan ID
+                                </TableHead>
+                                <TableHead className="bg-amber-50/60 dark:bg-amber-900/20 text-amber-900 dark:text-amber-300 font-semibold">
+                                  CTR
+                                </TableHead>
+                                <TableHead className="bg-amber-50/60 dark:bg-amber-900/20 text-amber-900 dark:text-amber-300 font-semibold">
+                                  Revenue
+                                </TableHead>
+                                <TableHead className="bg-amber-50/60 dark:bg-amber-900/20 text-amber-900 dark:text-amber-300 font-semibold">
+                                  Clicks
+                                </TableHead>
+                                <TableHead className="bg-amber-50/60 dark:bg-amber-900/20 text-amber-900 dark:text-amber-300 font-semibold">
+                                  Distribution
+                                </TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {performanceData.map((item, idx) => (
+                                <TableRow 
+                                  key={`${item.plan_id}-${idx}`} 
+                                  className={`${idx % 2 === 0 
+                                    ? 'bg-white dark:bg-gray-800' 
+                                    : 'bg-gray-50/50 dark:bg-gray-700/50'
+                                  } hover:bg-amber-50/20 dark:hover:bg-amber-900/20 transition-colors`}
+                                >
+                                  <TableCell className="font-medium text-gray-800 dark:text-gray-300">{item.publisher}</TableCell>
+                                  <TableCell className="font-medium text-amber-900 dark:text-amber-300">{item.plan_id}</TableCell>
+                                  <TableCell className="text-gray-800 dark:text-gray-200">{formatNumber(item.CTR, 'CTR')}</TableCell>
+                                  <TableCell className="font-medium text-emerald-700 dark:text-emerald-400">{formatNumber(item.avg_revenue, 'Revenue')}</TableCell>
+                                  <TableCell className="text-blue-700 dark:text-blue-400">{formatNumber(item.clicks, 'ExpectedClicks')}</TableCell>
+                                  <TableCell className="text-gray-800 dark:text-gray-200">{formatNumber(item.distribution, 'Distribution')}</TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      ) : loadingPerformance ? (
+                        <div className="flex flex-col items-center justify-center py-12">
+                          <Loader2 className="h-8 w-8 text-amber-600 dark:text-amber-400 animate-spin mb-4" />
+                          <p className="text-gray-600 dark:text-gray-300">Loading performance data...</p>
+                        </div>
+                      ) : (
+                        <div className="text-center py-10 bg-gray-50 rounded-xl">
+                          <p className="text-gray-500">No performance data available</p>
+                        </div>
+                      )}
+                    </Tab.Panel>
+                  )}
+                </Tab.Panels>
+              </Tab.Group>
+              {!loading && !error && rankingData && renderPublisherCharts()}
+            </>
+          )}
+        </CardContent>
+        
+        <CardFooter className="bg-gray-50 dark:bg-gray-900 border-t border-gray-100 dark:border-gray-700 p-6 flex justify-center">
           <Button 
-            className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white px-6 py-5 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 font-medium text-base"
             onClick={onStartOver}
+            className="px-6 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-full flex items-center gap-2 transition-colors"
           >
-            <RefreshCcw className="mr-2 h-5 w-5" />
-            Start Over
+            <RefreshCcw className="h-4 w-4" /> Start Over
           </Button>
-        </div>
-      </CardContent>
-    </Card>
-    {!loading && !error && rankingData && renderPublisherCharts()}
-    </>
+        </CardFooter>
+      </Card>
+    </div>
   );
 };
 
