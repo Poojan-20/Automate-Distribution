@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Plan, HistoricalData, parseHistoricalData } from '@/utils/excelParser';
 import PlanTable from './PlanTable';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,9 @@ import {
   FileCheck, 
   ArrowRight,
   BarChart,
-  Loader2
+  Loader2,
+  IndianRupee,
+  Tag
 } from 'lucide-react';
 import { apiService } from '@/utils/apiService';
 import { savePlanToFirebase } from '@/utils/firebaseOperations';
@@ -44,6 +46,7 @@ const DataReview: React.FC<DataReviewProps> = ({ inventoryData, historicalFile, 
   const [warning, setWarning] = useState<string | null>(null);
   const [firebaseSaveStatus, setFirebaseSaveStatus] = useState<{success: number; failed: number}>({ success: 0, failed: 0 });
   const [loadingStats, setLoadingStats] = useState<boolean>(true);
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const { toast } = useToast();
 
   // Initialize with the inventory data
@@ -362,6 +365,50 @@ const DataReview: React.FC<DataReviewProps> = ({ inventoryData, historicalFile, 
     }).length;
   };
 
+  // Get filtered plans based on search query
+  const filteredPlans = useMemo(() => {
+    if (!searchQuery) return plans;
+    
+    return plans.filter(plan => {
+      const planIdMatch = plan.planId.toLowerCase().includes(searchQuery.toLowerCase());
+      const subcategoryMatch = plan.subcategory.toLowerCase().includes(searchQuery.toLowerCase());
+      const brandNameMatch = plan.brand_name.toLowerCase().includes(searchQuery.toLowerCase());
+      return planIdMatch || subcategoryMatch || brandNameMatch;
+    });
+  }, [plans, searchQuery]);
+
+  // Calculate totals for summary section
+  const totals = useMemo(() => {
+    return filteredPlans.reduce((acc, plan) => {
+      // Sum budget cap (only for plans with Paid tag)
+      if (plan.tags.includes('Paid') && plan.budgetCap !== undefined) {
+        acc.budgetCap += plan.budgetCap;
+      }
+      
+      // Sum average revenue
+      if (plan.avgRevenue) {
+        acc.avgRevenue += plan.avgRevenue;
+      }
+      
+      // Sum FOC clicks
+      if (plan.tags.includes('FOC') && plan.clicksToBeDelivered !== undefined) {
+        acc.focClicks += plan.clicksToBeDelivered;
+      }
+      
+      // Sum mandatory distribution count
+      if (plan.tags.includes('Mandatory') && plan.distributionCount !== undefined) {
+        acc.mandatoryDistribution += plan.distributionCount;
+      }
+      
+      return acc;
+    }, {
+      budgetCap: 0,
+      avgRevenue: 0,
+      focClicks: 0,
+      mandatoryDistribution: 0
+    });
+  }, [filteredPlans]);
+
   return (
     <Card className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden">
       <CardHeader className="border-b border-gray-100 dark:border-gray-700 bg-gradient-to-r from-indigo-50 to-violet-50 dark:from-gray-800 dark:to-gray-700 px-6 py-5">
@@ -436,7 +483,62 @@ const DataReview: React.FC<DataReviewProps> = ({ inventoryData, historicalFile, 
         </div>
 
         <div className="w-full overflow-x-auto">
-          <PlanTable plans={plans} onPlanUpdate={handlePlanUpdate} />
+          <PlanTable 
+            plans={plans} 
+            onPlanUpdate={handlePlanUpdate} 
+            searchQuery={searchQuery} 
+            onSearchChange={setSearchQuery} 
+          />
+        </div>
+        
+        {/* Summary Totals Section */}
+        <div className="bg-violet-50 dark:bg-violet-900/20 rounded-xl p-5 border border-violet-100 dark:border-violet-800">
+          <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
+            <BarChart className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+            Totals Summary {searchQuery && <span className="text-sm font-normal text-gray-500">({filteredPlans.length} filtered plans)</span>}
+          </h3>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-violet-200 dark:border-violet-700 shadow-sm">
+              <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-1">
+                <IndianRupee className="h-4 w-4 mr-1 text-violet-500" />
+                <span>Total Budget Cap</span>
+              </div>
+              <div className="text-2xl font-bold text-violet-700 dark:text-violet-400">
+                ₹{totals.budgetCap.toLocaleString()}
+              </div>
+            </div>
+            
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-emerald-200 dark:border-emerald-700 shadow-sm">
+              <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-1">
+                <BarChart className="h-4 w-4 mr-1 text-emerald-500" />
+                <span>Total Avg Revenue</span>
+              </div>
+              <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                ₹{totals.avgRevenue.toLocaleString()}
+              </div>
+            </div>
+            
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-amber-200 dark:border-amber-700 shadow-sm">
+              <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-1">
+                <Tag className="h-4 w-4 mr-1 text-amber-500" />
+                <span>Total FOC Clicks</span>
+              </div>
+              <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">
+                {totals.focClicks.toLocaleString()}
+              </div>
+            </div>
+            
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-indigo-200 dark:border-indigo-700 shadow-sm">
+              <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-1">
+                <Tag className="h-4 w-4 mr-1 text-indigo-500" />
+                <span>Total Mandatory Distribution</span>
+              </div>
+              <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+                {totals.mandatoryDistribution.toLocaleString()}
+              </div>
+            </div>
+          </div>
         </div>
       </CardContent>
       

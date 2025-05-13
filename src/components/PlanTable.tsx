@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Plan, PREDEFINED_PUBLISHERS, PREDEFINED_TAGS } from '@/utils/excelParser';
 import {
   Table,
@@ -16,10 +16,16 @@ import { useToast } from "@/components/ui/use-toast";
 interface PlanTableProps {
   plans: Plan[];
   onPlanUpdate: (updatedPlan: Plan) => void;
+  searchQuery?: string;
+  onSearchChange?: (query: string) => void;
 }
 
-const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanUpdate }) => {
-  const [searchQuery, setSearchQuery] = useState<string>('');
+const PlanTable: React.FC<PlanTableProps> = ({ 
+  plans, 
+  onPlanUpdate, 
+  searchQuery = '', 
+  onSearchChange 
+}) => {
   const { toast } = useToast();
 
   if (!plans || plans.length === 0) {
@@ -59,6 +65,7 @@ const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanUpdate }) => {
   };
 
   const filteredPlans = plans.filter(plan => {
+    if (!searchQuery) return true;
     const planIdMatch = plan.planId.toLowerCase().includes(searchQuery.toLowerCase());
     const subcategoryMatch = plan.subcategory.toLowerCase().includes(searchQuery.toLowerCase());
     const brandNameMatch = plan.brand_name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -190,7 +197,7 @@ const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanUpdate }) => {
               type="text"
               placeholder="Search by Plan ID, Brand Name or Subcategory..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => onSearchChange ? onSearchChange(e.target.value) : null}
               className="w-full py-2.5 pl-10 pr-4 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-600 focus:border-violet-300 dark:focus:border-violet-500 focus:ring focus:ring-violet-200 dark:focus:ring-violet-500 focus:ring-opacity-50"
             />
             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -198,7 +205,7 @@ const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanUpdate }) => {
             </div>
             {searchQuery && (
               <button
-                onClick={() => setSearchQuery('')}
+                onClick={() => onSearchChange ? onSearchChange('') : null}
                 className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
               >
                 <X className="h-4 w-4" />
