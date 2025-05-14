@@ -975,46 +975,46 @@ const ResultsView: React.FC<ResultsViewProps> = ({ resultFile, performanceReport
                     </div>
                     
                     {rankingData?.all_publishers && rankingData.all_publishers.length > 0 ? (
-                      <div className="overflow-x-auto modern-table rounded-xl">
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
-                                Rank
-                              </TableHead>
-                              <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
-                                Plan ID
-                              </TableHead>
-                              <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
-                                Publisher
-                              </TableHead>
-                              <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
-                                Exp. Distribution
-                              </TableHead>
-                              <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
-                                CTR
-                              </TableHead>
-                              <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
-                                EPC
-                              </TableHead>
-                              <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
-                                Revenue
-                              </TableHead>
-                              <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
-                                Exp. Clicks
-                              </TableHead>
-                              <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
-                                Budget Cap
-                              </TableHead>
-                              <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
-                                Tags
-                              </TableHead>
-                              <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
-                                Subcategory
-                              </TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
+                      <div className="overflow-x-auto rounded-xl border border-gray-200">
+                      <table className="w-full caption-bottom text-sm">
+                        <thead>
+                          <tr>
+                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                              Rank
+                            </th>
+                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                              Plan ID
+                            </th>
+                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                              Publisher
+                            </th>
+                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                              Exp. Distribution
+                            </th>
+                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                              CTR
+                            </th>
+                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                              EPC
+                            </th>
+                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                              Revenue
+                            </th>
+                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                              Exp. Clicks
+                            </th>
+                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                              Budget Cap
+                            </th>
+                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                              Tags
+                            </th>
+                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                              Subcategory
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
                             {rankingData.all_publishers.map((item, idx) => (
                               <TableRow 
                                 key={`${item.plan_id}-${idx}`} 
@@ -1044,8 +1044,8 @@ const ResultsView: React.FC<ResultsViewProps> = ({ resultFile, performanceReport
                                 </TableCell>
                               </TableRow>
                             ))}
-                          </TableBody>
-                        </Table>
+                            </tbody>
+                            </table>
                       </div>
                     ) : (
                       <div className="text-center py-10 bg-gray-50 rounded-xl">
@@ -1072,46 +1072,46 @@ const ResultsView: React.FC<ResultsViewProps> = ({ resultFile, performanceReport
                       </div>
                       
                       {rankingData?.by_publisher && rankingData.by_publisher[publisher] && rankingData.by_publisher[publisher].length > 0 ? (
-                        <div className="overflow-x-auto modern-table rounded-xl">
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
-                                  Rank
-                                </TableHead>
-                                <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
-                                  Plan ID
-                                </TableHead>
-                                <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
-                                  Publisher
-                                </TableHead>
-                                <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
-                                  Exp. Distribution
-                                </TableHead>
-                                <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
-                                  CTR
-                                </TableHead>
-                                <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
-                                  EPC
-                                </TableHead>
-                                <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
-                                  Revenue
-                                </TableHead>
-                                <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
-                                  Exp. Clicks
-                                </TableHead>
-                                <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
-                                  Budget Cap
-                                </TableHead>
-                                <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
-                                  Tags
-                                </TableHead>
-                                <TableHead className="bg-violet-50/60 dark:bg-violet-900/20 text-violet-900 dark:text-violet-300 font-semibold">
-                                  Subcategory
-                                </TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
+                        <div className="overflow-x-auto rounded-xl border border-gray-200">
+                        <table className="w-full caption-bottom text-sm">
+                          <thead>
+                            <tr>
+                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                                Rank
+                              </th>
+                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                                Plan ID
+                              </th>
+                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                                Publisher
+                              </th>
+                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                                Exp. Distribution
+                              </th>
+                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                                CTR
+                              </th>
+                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                                EPC
+                              </th>
+                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                                Revenue
+                              </th>
+                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                                Exp. Clicks
+                              </th>
+                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                                Budget Cap
+                              </th>
+                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                                Tags
+                              </th>
+                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                                Subcategory
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
                               {rankingData.by_publisher[publisher].map((item, idx) => (
                                 <TableRow 
                                   key={`${item.plan_id}-${idx}`} 
@@ -1141,8 +1141,8 @@ const ResultsView: React.FC<ResultsViewProps> = ({ resultFile, performanceReport
                                   </TableCell>
                                 </TableRow>
                               ))}
-                            </TableBody>
-                          </Table>
+                            </tbody>
+                          </table>
                         </div>
                       ) : (
                         <div className="text-center py-10 bg-gray-50 rounded-xl">
@@ -1170,26 +1170,26 @@ const ResultsView: React.FC<ResultsViewProps> = ({ resultFile, performanceReport
                       </div>
                       
                       {performanceData && performanceData.length > 0 ? (
-                        <div className="overflow-x-auto modern-table rounded-xl">
+                        <div className="overflow-x-auto rounded-xl">
                           <Table>
                             <TableHeader>
                               <TableRow>
-                                <TableHead className="bg-amber-50/60 dark:bg-amber-900/20 text-amber-900 dark:text-amber-300 font-semibold">
+                                <TableHead className="bg-gray-300 dark:bg-amber-900/20 text-amber-900 dark:text-amber-300 font-semibold">
                                   Publisher
                                 </TableHead>
-                                <TableHead className="bg-amber-50/60 dark:bg-amber-900/20 text-amber-900 dark:text-amber-300 font-semibold">
+                                <TableHead className="bg-gray-300 dark:bg-amber-900/20 text-amber-900 dark:text-amber-300 font-semibold">
                                   Plan ID
                                 </TableHead>
-                                <TableHead className="bg-amber-50/60 dark:bg-amber-900/20 text-amber-900 dark:text-amber-300 font-semibold">
+                                <TableHead className="bg-gray-300 dark:bg-amber-900/20 text-amber-900 dark:text-amber-300 font-semibold">
                                   CTR
                                 </TableHead>
-                                <TableHead className="bg-amber-50/60 dark:bg-amber-900/20 text-amber-900 dark:text-amber-300 font-semibold">
+                                <TableHead className="bg-gray-300 dark:bg-amber-900/20 text-amber-900 dark:text-amber-300 font-semibold">
                                   Revenue
                                 </TableHead>
-                                <TableHead className="bg-amber-50/60 dark:bg-amber-900/20 text-amber-900 dark:text-amber-300 font-semibold">
+                                <TableHead className="bg-gray-300 dark:bg-amber-900/20 text-amber-900 dark:text-amber-300 font-semibold">
                                   Clicks
                                 </TableHead>
-                                <TableHead className="bg-amber-50/60 dark:bg-amber-900/20 text-amber-900 dark:text-amber-300 font-semibold">
+                                <TableHead className="bg-gray-300 dark:bg-amber-900/20 text-amber-900 dark:text-amber-300 font-semibold">
                                   Distribution
                                 </TableHead>
                               </TableRow>

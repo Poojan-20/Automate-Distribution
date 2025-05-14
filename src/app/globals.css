@@ -331,8 +331,8 @@ body {
 }
 
 .modern-table th {
-  background-color: var(--muted);
-  color: var(--foreground);
+  background-color: #FFFFFF;
+  color: #2A2A2A;
   font-weight: 600;
   font-size: 0.875rem;
   letter-spacing: 0.05em;
