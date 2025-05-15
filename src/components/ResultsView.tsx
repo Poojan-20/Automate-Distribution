@@ -979,37 +979,37 @@ const ResultsView: React.FC<ResultsViewProps> = ({ resultFile, performanceReport
                       <table className="w-full caption-bottom text-sm">
                         <thead>
                           <tr>
-                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold  border-b">
                               Rank
                             </th>
-                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold border-b">
                               Plan ID
                             </th>
-                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold border-b">
                               Publisher
                             </th>
-                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold border-b">
                               Exp. Distribution
                             </th>
-                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold border-b">
                               CTR
                             </th>
-                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold border-b">
                               EPC
                             </th>
-                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold border-b">
                               Revenue
                             </th>
-                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold border-b">
                               Exp. Clicks
                             </th>
-                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold border-b">
                               Budget Cap
                             </th>
-                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold border-b">
                               Tags
                             </th>
-                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold border-b">
                               Subcategory
                             </th>
                           </tr>
@@ -1076,37 +1076,37 @@ const ResultsView: React.FC<ResultsViewProps> = ({ resultFile, performanceReport
                         <table className="w-full caption-bottom text-sm">
                           <thead>
                             <tr>
-                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold border-b">
                                 Rank
                               </th>
-                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold border-b">
                                 Plan ID
                               </th>
-                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold border-b">
                                 Publisher
                               </th>
-                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold border-b">
                                 Exp. Distribution
                               </th>
-                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold border-b">
                                 CTR
                               </th>
-                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold border-b">
                                 EPC
                               </th>
-                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold border-b">
                                 Revenue
                               </th>
-                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold border-b">
                                 Exp. Clicks
                               </th>
-                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold border-b">
                                 Budget Cap
                               </th>
-                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold border-b">
                                 Tags
                               </th>
-                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-medium border-b">
+                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold border-b">
                                 Subcategory
                               </th>
                             </tr>
@@ -1174,22 +1174,22 @@ const ResultsView: React.FC<ResultsViewProps> = ({ resultFile, performanceReport
                           <Table>
                             <TableHeader>
                               <TableRow>
-                                <TableHead className="bg-gray-300 dark:bg-amber-900/20 text-amber-900 dark:text-amber-300 font-semibold">
+                                <TableHead className="bg-gray-300 dark:bg-amber-900/20 text-amber-900 dark:text-amber-300 font-bold">
                                   Publisher
                                 </TableHead>
-                                <TableHead className="bg-gray-300 dark:bg-amber-900/20 text-amber-900 dark:text-amber-300 font-semibold">
+                                <TableHead className="bg-gray-300 dark:bg-amber-900/20 text-amber-900 dark:text-amber-300 font-bold">
                                   Plan ID
                                 </TableHead>
-                                <TableHead className="bg-gray-300 dark:bg-amber-900/20 text-amber-900 dark:text-amber-300 font-semibold">
+                                <TableHead className="bg-gray-300 dark:bg-amber-900/20 text-amber-900 dark:text-amber-300 font-bold">
                                   CTR
                                 </TableHead>
-                                <TableHead className="bg-gray-300 dark:bg-amber-900/20 text-amber-900 dark:text-amber-300 font-semibold">
+                                <TableHead className="bg-gray-300 dark:bg-amber-900/20 text-amber-900 dark:text-amber-300 font-bold">
                                   Revenue
                                 </TableHead>
-                                <TableHead className="bg-gray-300 dark:bg-amber-900/20 text-amber-900 dark:text-amber-300 font-semibold">
+                                <TableHead className="bg-gray-300 dark:bg-amber-900/20 text-amber-900 dark:text-amber-300 font-bold">
                                   Clicks
                                 </TableHead>
-                                <TableHead className="bg-gray-300 dark:bg-amber-900/20 text-amber-900 dark:text-amber-300 font-semibold">
+                                <TableHead className="bg-gray-300 dark:bg-amber-900/20 text-amber-900 dark:text-amber-300 font-bold">
                                   Distribution
                                 </TableHead>
                               </TableRow>

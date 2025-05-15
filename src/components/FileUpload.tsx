@@ -198,11 +198,11 @@ export default function FileUpload({ onProcessed }: FileUploadProps) {
             >
               {!inventoryFile ? (
                 <>
-                  <div className="mb-4 rounded-full bg-primary p-3 text-gray-700">
-                    <UploadCloud className="h-8 w-8 " />
+                  <div className="mb-4 rounded-full bg-gray-200 dark:bg-gray-600 p-3 text-gray-700">
+                    <UploadCloud className="h-8 w-8" />
                   </div>
                   <p className="mb-2 text-sm font-medium text-gray-700">Drag and drop or click to upload</p>
-                  <p className="text-xs text-muted-foreground mb-4 text-gray-700">
+                  <p className="text-xs text-muted-foreground mb-4">
                     Upload Excel file with Plan ID and Subcategory columns
                   </p>
                   <Input
@@ -216,7 +216,7 @@ export default function FileUpload({ onProcessed }: FileUploadProps) {
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="cursor-pointer"
+                    className="cursor-pointer text-gray-700"
                     onClick={() => inventoryInputRef.current?.click()}
                   >
                     Select File
@@ -265,11 +265,11 @@ export default function FileUpload({ onProcessed }: FileUploadProps) {
             >
               {!historicalFile ? (
                 <>
-                  <div className="mb-4 rounded-full bg-primary p-3 text-gray-700">
+                  <div className="mb-4 rounded-full p-3 text-gray-700 bg-gray-200 dark:bg-gray-600">
                     <UploadCloud className="h-8 w-8" />
                   </div>
                   <p className="mb-2 text-sm font-medium text-gray-700">Drag and drop or click to upload</p>
-                  <p className="text-xs text-muted-foreground mb-4 text-gray-700">
+                  <p className="text-xs text-muted-foreground mb-4">
                     Support for Excel files (.xlsx, .xls, .csv)
                   </p>
                   <Input
@@ -283,7 +283,7 @@ export default function FileUpload({ onProcessed }: FileUploadProps) {
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="cursor-pointer"
+                    className="cursor-pointer text-gray-700"
                     onClick={() => historicalInputRef.current?.click()}
                   >
                     Select File
