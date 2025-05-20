@@ -123,6 +123,33 @@ export const apiService = {
         };
       });
 
+      // Validate the normalized data before sending to backend
+      const validationErrors: string[] = [];
+      normalizedUserInput.forEach(row => {
+        const tags = Array.isArray(row.tags) ? row.tags : [row.tags];
+        
+        // Validate distribution count for Mandatory tag
+        if (tags.includes('Mandatory')) {
+          const distribution = typeof row.distribution === 'number' ? row.distribution : 0;
+          if (distribution <= 0) {
+            validationErrors.push(`Plan ${row.plan_id}: Distribution count must be greater than 0 for Mandatory tag`);
+          }
+        }
+        
+        // Validate clicks to be delivered for FOC tag
+        if (tags.includes('FOC')) {
+          const clicks = typeof row.clicks_to_be_delivered === 'number' ? row.clicks_to_be_delivered : 0;
+          if (clicks <= 0) {
+            validationErrors.push(`Plan ${row.plan_id}: Clicks to be delivered must be greater than 0 for FOC tag`);
+          }
+        }
+      });
+
+      // If there are validation errors, throw them all at once
+      if (validationErrors.length > 0) {
+        throw new Error(`Validation failed:\n${validationErrors.join('\n')}`);
+      }
+
       console.log('Normalized sample user input:', 
         normalizedUserInput.length > 0 ? JSON.stringify(normalizedUserInput[0]) : 'No data');
 

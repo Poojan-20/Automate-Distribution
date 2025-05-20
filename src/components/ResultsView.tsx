@@ -294,11 +294,14 @@ const ResultsView: React.FC<ResultsViewProps> = ({ resultFile, performanceReport
   // Define chart colors for publishers
   const publisherColors = {
     Jiocinema: "#4f46e5", // Indigo
-    Jioengage: "#06b6d4", // Cyan
-    MyJio: "#10b981",     // Emerald
+    JioEngage: "#ec4899", // Cyan
+    MyJio: "#8b5cf6",     // Violet
     JioCoupons: "#f59e0b", // Amber
-    Default1: "#8b5cf6",  // Violet
+    Default1: "#10b981",  // Emerald
   };
+
+  // Define a single color palette for all charts
+  const colorPalette = ["#4f46e5", "#06b6d4", "#8b5cf6", "#f59e0b", "#10b981", "#d946ef", "#ec4899", "#f43f5e"];
 
   // Create chart config for EPC and CTR
   const epcChartConfig: ChartConfig = {
@@ -317,9 +320,6 @@ const ResultsView: React.FC<ResultsViewProps> = ({ resultFile, performanceReport
   
   // Add publisher-specific configs - simplified with hardcoded colors
   publishers.forEach((publisher, index) => {
-    // Define a set of hardcoded colors to use
-    const colorPalette = ["#4f46e5", "#06b6d4", "#10b981", "#f59e0b", "#8b5cf6"];
-    
     epcChartConfig[publisher] = {
       label: publisher,
       color: publisherColors[publisher as keyof typeof publisherColors] || 
@@ -337,9 +337,6 @@ const ResultsView: React.FC<ResultsViewProps> = ({ resultFile, performanceReport
   const getPublisherChartData = () => {
     console.log(chartData)
     return publishers.map(pub => {
-      // Define a set of hardcoded colors to use
-      const colorPalette = ["#4f46e5", "#06b6d4", "#10b981", "#f59e0b", "#8b5cf6"];
-      
       return {
         publisher: pub,
         epc: publisherMetrics[pub]?.epc || 0,
@@ -389,9 +386,6 @@ const ResultsView: React.FC<ResultsViewProps> = ({ resultFile, performanceReport
     const result = Object.entries(publisherData)
       .filter(([, value]) => value > 0) // Filter out zero values
       .map(([publisher, value], index) => {
-        // Define a set of hardcoded colors to use
-        const colorPalette = ["#4f46e5", "#06b6d4", "#10b981", "#f59e0b", "#8b5cf6", "#d946ef", "#ec4899", "#f43f5e"];
-        
         return {
           publisher,
           value,
@@ -407,16 +401,13 @@ const ResultsView: React.FC<ResultsViewProps> = ({ resultFile, performanceReport
   // Create config for the pie chart
   const pieChartConfig: ChartConfig = {
     value: {
-      label: "Value",
+      label: "value",
       color: "#4f46e5" // Indigo
     }
   };
   
   // Add publisher-specific configs to pie chart
   publishers.forEach((publisher, index) => {
-    // Define a set of hardcoded colors to use
-    const colorPalette = ["#4f46e5", "#06b6d4", "#10b981", "#f59e0b", "#8b5cf6", "#d946ef", "#ec4899", "#f43f5e"];
-    
     pieChartConfig[publisher] = {
       label: publisher,
       color: publisherColors[publisher as keyof typeof publisherColors] || 
@@ -680,7 +671,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ resultFile, performanceReport
                           <ChartTooltipContent
                             indicator="line"
                             className='text-black dark:text-white'
-                            labelFormatter={(label) => `Publisher: ${label}`}
+                            labelFormatter={(label) => `Publisher: ${label}`} 
                           />
                         }
                       />
@@ -979,37 +970,37 @@ const ResultsView: React.FC<ResultsViewProps> = ({ resultFile, performanceReport
                       <table className="w-full caption-bottom text-sm">
                         <thead>
                           <tr>
-                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold  border-b">
+                            <th className="p-3 text-left bg-gray-300 dark:bg-gray-700 text-gray-700 font-bold  border-b">
                               Rank
                             </th>
-                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold border-b">
+                            <th className="p-3 text-left bg-gray-300 dark:bg-gray-700 text-gray-700 font-bold border-b">
                               Plan ID
                             </th>
-                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold border-b">
+                            <th className="p-3 text-left bg-gray-300 dark:bg-gray-700 text-gray-700 font-bold border-b">
                               Publisher
                             </th>
-                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold border-b">
+                            <th className="p-3 text-left bg-gray-300 dark:bg-gray-700 text-gray-700 font-bold border-b">
                               Exp. Distribution
                             </th>
-                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold border-b">
+                            <th className="p-3 text-left bg-gray-300 dark:bg-gray-700 text-gray-700 font-bold border-b">
                               CTR
                             </th>
-                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold border-b">
+                            <th className="p-3 text-left bg-gray-300 dark:bg-gray-700 text-gray-700 font-bold border-b">
                               EPC
                             </th>
-                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold border-b">
+                            <th className="p-3 text-left bg-gray-300 dark:bg-gray-700 text-gray-700 font-bold border-b">
                               Revenue
                             </th>
-                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold border-b">
+                            <th className="p-3 text-left bg-gray-300 dark:bg-gray-700 text-gray-700 font-bold border-b">
                               Exp. Clicks
                             </th>
-                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold border-b">
+                            <th className="p-3 text-left bg-gray-300 dark:bg-gray-700 text-gray-700 font-bold border-b">
                               Budget Cap
                             </th>
-                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold border-b">
+                            <th className="p-3 text-left bg-gray-300 dark:bg-gray-700 text-gray-700 font-bold border-b">
                               Tags
                             </th>
-                            <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold border-b">
+                            <th className="p-3 text-left bg-gray-300 dark:bg-gray-700 text-gray-700 font-bold border-b">
                               Subcategory
                             </th>
                           </tr>
@@ -1076,37 +1067,37 @@ const ResultsView: React.FC<ResultsViewProps> = ({ resultFile, performanceReport
                         <table className="w-full caption-bottom text-sm">
                           <thead>
                             <tr>
-                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold border-b">
+                              <th className="p-3 text-left bg-gray-300 dark:bg-gray-700 text-gray-700 font-bold border-b">
                                 Rank
                               </th>
-                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold border-b">
+                              <th className="p-3 text-left bg-gray-300 dark:bg-gray-700 text-gray-700 font-bold border-b">
                                 Plan ID
                               </th>
-                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold border-b">
+                              <th className="p-3 text-left bg-gray-300 dark:bg-gray-700 text-gray-700 font-bold border-b">
                                 Publisher
                               </th>
-                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold border-b">
+                              <th className="p-3 text-left bg-gray-300 dark:bg-gray-700 text-gray-700 font-bold border-b">
                                 Exp. Distribution
                               </th>
-                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold border-b">
+                              <th className="p-3 text-left bg-gray-300 dark:bg-gray-700 text-gray-700 font-bold border-b">
                                 CTR
                               </th>
-                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold border-b">
+                              <th className="p-3 text-left bg-gray-300 dark:bg-gray-700 text-gray-700 font-bold border-b">
                                 EPC
                               </th>
-                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold border-b">
+                              <th className="p-3 text-left bg-gray-300 dark:bg-gray-700 text-gray-700 font-bold border-b">
                                 Revenue
                               </th>
-                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold border-b">
+                              <th className="p-3 text-left bg-gray-300 dark:bg-gray-700 text-gray-700 font-bold border-b">
                                 Exp. Clicks
                               </th>
-                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold border-b">
+                              <th className="p-3 text-left bg-gray-300 dark:bg-gray-700 text-gray-700 font-bold border-b">
                                 Budget Cap
                               </th>
-                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold border-b">
+                              <th className="p-3 text-left bg-gray-300 dark:bg-gray-700 text-gray-700 font-bold border-b">
                                 Tags
                               </th>
-                              <th className="p-3 text-left bg-gray-300 text-gray-700 font-bold border-b">
+                              <th className="p-3 text-left bg-gray-300 dark:bg-gray-700 text-gray-700 font-bold border-b">
                                 Subcategory
                               </th>
                             </tr>

@@ -171,47 +171,59 @@ const DataReview: React.FC<DataReviewProps> = ({ inventoryData, historicalFile, 
   const validatePlans = (): boolean => {
     let isValid = true;
     let unfilledCount = 0;
+    let validationErrors: string[] = [];
 
     plans.forEach(plan => {
       // Check if publisher is selected
       if (!plan.publisher || plan.publisher.length === 0) {
         isValid = false;
         unfilledCount++;
+        validationErrors.push(`Plan ${plan.planId}: Publisher not selected`);
       }
       
       // Budget cap validation - only required for Paid tag
       if (plan.tags.includes('Paid')) {
-        if (plan.budgetCap === undefined) {
+        if (plan.budgetCap === undefined || plan.budgetCap === null) {
           isValid = false;
           unfilledCount++;
+          validationErrors.push(`Plan ${plan.planId}: Budget cap required for Paid tag`);
         }
       }
       
       // Add validation for mandatory fields based on tags
       if (plan.tags.includes('Mandatory')) {
-        // For Mandatory tag, distribution count must be provided but can be 0
-        if (plan.distributionCount === undefined) {
+        // For Mandatory tag, distribution count must be provided and greater than 0
+        if (plan.distributionCount === undefined || plan.distributionCount === null || plan.distributionCount <= 0) {
           isValid = false;
           unfilledCount++;
+          validationErrors.push(`Plan ${plan.planId}: Distribution count must be greater than 0 for Mandatory tag`);
         }
       }
       
       if (plan.tags.includes('FOC')) {
-        // For FOC tag, clicks to be delivered must be provided but can be 0
-        if (plan.clicksToBeDelivered === undefined) {
+        // For FOC tag, clicks to be delivered must be provided and greater than 0
+        if (plan.clicksToBeDelivered === undefined || plan.clicksToBeDelivered === null || plan.clicksToBeDelivered <= 0) {
           isValid = false;
           unfilledCount++;
+          validationErrors.push(`Plan ${plan.planId}: Clicks to be delivered must be greater than 0 for FOC tag`);
         }
       }
     });
 
     if (!isValid) {
-      setWarning(`${unfilledCount} plan(s) have missing values. Please check publisher and required fields for each tag type.`);
-      // Keep this toast - it's a validation error that needs user attention
+      const errorMessage = validationErrors.join('\n');
+      setWarning(errorMessage);
+      // Show a more detailed toast with the first few errors
+      const firstFewErrors = validationErrors.slice(0, 3).join('\n');
+      const remainingCount = validationErrors.length - 3;
+      const toastMessage = remainingCount > 0 
+        ? `${firstFewErrors}\n...and ${remainingCount} more errors`
+        : firstFewErrors;
+      
       toast({
         variant: "warning",
-        title: "Validation Warning",
-        description: `${unfilledCount} plan(s) have missing values. Please check publisher and required fields for each tag type.`,
+        title: "Validation Errors",
+        description: toastMessage,
       });
     } else {
       setWarning(null);
@@ -249,6 +261,7 @@ const DataReview: React.FC<DataReviewProps> = ({ inventoryData, historicalFile, 
       return;
     }
 
+    // Validate plans before proceeding
     if (!validatePlans()) {
       return;
     }
