@@ -170,14 +170,12 @@ const DataReview: React.FC<DataReviewProps> = ({ inventoryData, historicalFile, 
   // Validate all plans before submission
   const validatePlans = (): boolean => {
     let isValid = true;
-    let unfilledCount = 0;
-    let validationErrors: string[] = [];
+    const validationErrors: string[] = [];
 
     plans.forEach(plan => {
       // Check if publisher is selected
       if (!plan.publisher || plan.publisher.length === 0) {
         isValid = false;
-        unfilledCount++;
         validationErrors.push(`Plan ${plan.planId}: Publisher not selected`);
       }
       
@@ -185,7 +183,6 @@ const DataReview: React.FC<DataReviewProps> = ({ inventoryData, historicalFile, 
       if (plan.tags.includes('Paid')) {
         if (plan.budgetCap === undefined || plan.budgetCap === null) {
           isValid = false;
-          unfilledCount++;
           validationErrors.push(`Plan ${plan.planId}: Budget cap required for Paid tag`);
         }
       }
@@ -195,7 +192,6 @@ const DataReview: React.FC<DataReviewProps> = ({ inventoryData, historicalFile, 
         // For Mandatory tag, distribution count must be provided and greater than 0
         if (plan.distributionCount === undefined || plan.distributionCount === null || plan.distributionCount <= 0) {
           isValid = false;
-          unfilledCount++;
           validationErrors.push(`Plan ${plan.planId}: Distribution count must be greater than 0 for Mandatory tag`);
         }
       }
@@ -204,7 +200,6 @@ const DataReview: React.FC<DataReviewProps> = ({ inventoryData, historicalFile, 
         // For FOC tag, clicks to be delivered must be provided and greater than 0
         if (plan.clicksToBeDelivered === undefined || plan.clicksToBeDelivered === null || plan.clicksToBeDelivered <= 0) {
           isValid = false;
-          unfilledCount++;
           validationErrors.push(`Plan ${plan.planId}: Clicks to be delivered must be greater than 0 for FOC tag`);
         }
       }
